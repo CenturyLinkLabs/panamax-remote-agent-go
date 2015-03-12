@@ -3,7 +3,6 @@ package agent
 import (
 	"encoding/json"
 	"io"
-	// "github.com/CenturyLinkLabs/panamax-remote-agent-go/adapter"
 )
 
 type DeploymentManager struct {
@@ -47,9 +46,7 @@ func (dm DeploymentManager) CreateDeployment(body io.Reader) (DeploymentResponse
 	jd := json.NewDecoder(body)
 	jd.Decode(deployment)
 
-	// TODO: merge override and template
-
-	dm.Adapter.CreateServices(deployment.Template.Images)
+	dm.Adapter.CreateServices(deployment.MergedImages())
 
 	dr, err := dm.Repo.Save(deployment)
 	if err != nil {

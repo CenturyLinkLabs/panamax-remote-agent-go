@@ -15,23 +15,26 @@ import (
 )
 
 var (
-	server  *httptest.Server
-	baseURI string
-	router  http.Handler
+	server        *httptest.Server
+	adapterServer *httptest.Server
+	baseURI       string
+	router        http.Handler
+	dRepo         agent.DeploymentRepo
 )
 
 func init() {
-	dRepo := agent.NewDeploymentRepo("../db/agent_test.db")
-	ad := agent.NewAdapter("http://localhost:9292")
+	dRepo = agent.NewDeploymentRepo("../db/agent_test.db")
+}
+
+func setup(dunk http.Handler) {
+	adapterServer = httptest.NewServer(dunk)
+	ad := agent.NewAdapter(adapterServer.URL)
 	dm, err := agent.NewDeploymentManager(dRepo, ad)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	router = NewServer(dm).newRouter()
-}
-
-func setup() {
 	server = httptest.NewServer(router)
 	baseURI = server.URL
 }
@@ -119,7 +122,7 @@ func removeAll() {
 }
 
 func TestListDeploymentsWhenNoDeploymentsExist(t *testing.T) {
-	setup()
+	setup(nil)
 	defer teardown()
 	removeAll()
 
@@ -134,7 +137,43 @@ func TestListDeploymentsWhenNoDeploymentsExist(t *testing.T) {
 }
 
 func TestCreateDeployment(t *testing.T) {
-	setup()
+	setup(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		jd := json.NewDecoder(r.Body)
+		imgs := &[]agent.Image{}
+		if err := jd.Decode(imgs); err != nil {
+			panic(err)
+		}
+
+		assert.Equal(t, []agent.Image{
+			{
+				Name:   "wp",
+				Source: "ov_source",
+				Links: []agent.Link{
+					{Service: "mysql", Alias: "DB_1"},
+				},
+				Ports: []agent.Port{
+					agent.Port{HostPort: 8000, ContainerPort: 80},
+				},
+				Environment: []agent.Environment{
+					{Variable: "DB_PASSWORD", Value: "pass@word02"},
+					{Variable: "DB_NAME", Value: "wordpress"},
+				},
+				Deployment: agent.DeploymentSettings{Count: 0},
+			},
+			{
+				Name:   "mysql",
+				Source: "centurylink/mysql:5.5",
+				Ports: []agent.Port{
+					{HostPort: 3306, ContainerPort: 3306},
+				},
+				Environment: []agent.Environment{
+					{Variable: "MYSQL_ROOT_PASSWORD", Value: "pass@word02"},
+				},
+				Deployment: agent.DeploymentSettings{Count: 0},
+			},
+		}, *imgs)
+
+	}))
 	defer teardown()
 
 	buf := strings.NewReader(`{
@@ -142,6 +181,7 @@ func TestCreateDeployment(t *testing.T) {
 			"images":[
 				{
 					"name":"wp",
+					"source":"ov_source",
 					"environment":[
 						{ "variable":"DB_PASSWORD", "value":"pass@word02" }
 					],
@@ -208,7 +248,7 @@ func TestCreateDeployment(t *testing.T) {
 }
 
 func TestListDeploymentsWhenOneExists(t *testing.T) {
-	setup()
+	setup(nil)
 	defer teardown()
 
 	res, _ := doGET(baseURI + "/deployments")
@@ -232,7 +272,7 @@ func TestListDeploymentsWhenOneExists(t *testing.T) {
 }
 
 func TestGetDeployment(t *testing.T) {
-	setup()
+	setup(nil)
 	defer teardown()
 
 	res, _ := doGET(baseURI + "/deployments")
@@ -270,7 +310,7 @@ func TestGetDeployment(t *testing.T) {
 }
 
 func TestDeleteDeployment(t *testing.T) {
-	setup()
+	setup(nil)
 	defer teardown()
 
 	res, _ := doGET(baseURI + "/deployments")
