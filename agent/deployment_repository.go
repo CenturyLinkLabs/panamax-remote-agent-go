@@ -29,7 +29,7 @@ func NewDeploymentRepo(dbPath string) DeploymentRepo {
 }
 
 func (dRepo DeploymentRepo) FindById(qid string) (DeploymentResponseFull, error) {
-	var id int
+	var id string
 	var name string
 	var sids sql.NullString // TODO: make this column NOT NULL
 	var template string
@@ -62,7 +62,7 @@ func (dRepo DeploymentRepo) All() (DeploymentResponses, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var id int
+		var id string
 		var name string
 		var sids sql.NullString // TODO: should probably just make this NOT NULL
 		var sidc []string
@@ -108,7 +108,7 @@ func (dRepo DeploymentRepo) Save(d *Deployment) (DeploymentResponseLite, error) 
 	}
 
 	dr := DeploymentResponseLite{
-		ID:           int(rID),
+		ID:           string(rID),
 		Name:         d.Template.Name,
 		Redeployable: template != "",
 	}
