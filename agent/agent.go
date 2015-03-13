@@ -70,19 +70,8 @@ type Image struct {
 }
 
 func (img *Image) OverrideWith(o Image) {
-	img.overrideSource(o)
 	img.overrideEnv(o)
 	img.overrideDeployment(o)
-	img.overrideLinks(o)
-	img.overridePorts(o)
-	img.overrideCommand(o)
-	// expose
-	// volumesFrom
-}
-
-func (i *Image) overrideLinks(o Image) {
-	// TODO: append, but uniq on alias
-	i.Links = append(i.Links, o.Links...)
 }
 
 func (img *Image) overrideDeployment(o Image) {
@@ -106,33 +95,6 @@ func (img *Image) overrideEnv(o Image) {
 		envs = append(envs, env)
 	}
 	img.Environment = envs
-}
-
-func (img *Image) overridePorts(o Image) {
-	//TODO add the extra override ports that didn't exist in base
-	ports := make([]Port, 0)
-
-	for _, port := range img.Ports {
-		for _, oPort := range o.Ports {
-			if port.ContainerPort == oPort.ContainerPort {
-				port = oPort
-			}
-		}
-		ports = append(ports, port)
-	}
-	img.Ports = ports
-}
-
-func (img *Image) overrideCommand(o Image) {
-	if o.Command != "" {
-		img.Command = o.Command
-	}
-}
-
-func (img *Image) overrideSource(o Image) {
-	if o.Source != "" {
-		img.Source = o.Source
-	}
 }
 
 type Template struct {

@@ -147,13 +147,13 @@ func TestCreateDeployment(t *testing.T) {
 		assert.Equal(t, []agent.Image{
 			{
 				Name:    "wp",
-				Source:  "ov_source",
+				Source:  "centurylink/wordpress:3.9.1",
 				Command: "./run.sh",
 				Links: []agent.Link{
 					{Service: "mysql", Alias: "DB_1"},
 				},
 				Ports: []agent.Port{
-					agent.Port{HostPort: 1111, ContainerPort: 80},
+					agent.Port{HostPort: 8000, ContainerPort: 80},
 				},
 				Environment: []agent.Environment{
 					{Variable: "DB_PASSWORD", Value: "pass@word02"},
@@ -164,7 +164,7 @@ func TestCreateDeployment(t *testing.T) {
 			{
 				Name:    "mysql",
 				Source:  "centurylink/mysql:5.5",
-				Command: "./run_better.sh",
+				Command: "./run.sh",
 				Ports: []agent.Port{
 					{HostPort: 3306, ContainerPort: 3306},
 				},
@@ -183,12 +183,8 @@ func TestCreateDeployment(t *testing.T) {
 			"images":[
 				{
 					"name":"wp",
-					"source":"ov_source",
 					"environment":[
 						{ "variable":"DB_PASSWORD", "value":"pass@word02" }
-					],
-					"ports":[
-						{ "host_port": 1111, "container_port":80 }
 					],
 					"deployment":{ "count":1 }
 				},
@@ -196,8 +192,7 @@ func TestCreateDeployment(t *testing.T) {
 					"name":"mysql",
 					"environment":[
 						{ "variable":"MYSQL_ROOT_PASSWORD", "value":"pass@word02" }
-					],
-					"command":"./run_better.sh"
+					]
 				}
 			]
 		},
