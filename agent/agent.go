@@ -57,23 +57,40 @@ type DeploymentSettings struct {
 type Image struct {
 	Name        string             `json:"name,omitempty"`
 	Source      string             `json:"source,omitempty"`
+	Command     string             `json:"command,omitempty"`
 	Deployment  DeploymentSettings `json:"deployment,omitempty"`
 	Links       []Link             `json:"links,omitempty"`
 	Environment []Environment      `json:"environment,omitempty"`
 	Ports       []Port             `json:"port,omitemptys`
+
+	// Categories
+	// Expose
+	// Volumes
+	// Volumes_from
 }
 
 func (img *Image) OverrideWith(o Image) {
 	img.overrideSource(o)
 	img.overrideEnv(o)
-	// img.overrideDeployment(o)
-	// img.Deployment = o.Deployment
-	// img.Links = o.Links
-	// img.Ports = o.Ports
+	img.overrideDeployment(o)
+	img.overrideLinks(o)
+	img.overridePorts(o)
+	img.overrideCommand(o)
+	// expose
+	// volumesFrom
 }
 
-func (i *Image) overrideDeployment(o Image) {
+func (i *Image) overrideLinks(o Image) {
+	// TODO: append, but uniq on alias
+	i.Links = append(i.Links, o.Links...)
+}
 
+func (img *Image) overrideDeployment(o Image) {
+	//TODO this could probably use reflection to iterate over the keys
+	// but for now there's only one
+	if (o.Deployment != DeploymentSettings{}) {
+		img.Deployment = o.Deployment
+	}
 }
 
 func (img *Image) overrideEnv(o Image) {
@@ -91,9 +108,30 @@ func (img *Image) overrideEnv(o Image) {
 	img.Environment = envs
 }
 
-func (i *Image) overrideSource(o Image) {
+func (img *Image) overridePorts(o Image) {
+	//TODO add the extra override ports that didn't exist in base
+	ports := make([]Port, 0)
+
+	for _, port := range img.Ports {
+		for _, oPort := range o.Ports {
+			if port.ContainerPort == oPort.ContainerPort {
+				port = oPort
+			}
+		}
+		ports = append(ports, port)
+	}
+	img.Ports = ports
+}
+
+func (img *Image) overrideCommand(o Image) {
+	if o.Command != "" {
+		img.Command = o.Command
+	}
+}
+
+func (img *Image) overrideSource(o Image) {
 	if o.Source != "" {
-		i.Source = o.Source
+		img.Source = o.Source
 	}
 }
 
