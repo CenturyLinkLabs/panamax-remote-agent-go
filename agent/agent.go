@@ -22,14 +22,14 @@ func (d *Deployment) MergedImages() []Image {
 type DeploymentResponses []DeploymentResponseLite
 
 type DeploymentResponseLite struct {
-	ID           string   `json:"id"`
+	ID           int      `json:"id"`
 	Name         string   `json:"name"`
 	Redeployable bool     `json:"redeployable"`
 	ServiceIDs   []string `json:"service_ids"`
 }
 
 type DeploymentResponseFull struct {
-	ID           string        `json:"id"`
+	ID           int           `json:"id"`
 	Name         string        `json:"name"`
 	Redeployable bool          `json:"redeployable"`
 	Status       ServiceStatus `json:"status"`

@@ -116,7 +116,7 @@ func removeAll() {
 	}
 
 	for _, dr := range *drs {
-		url := fmt.Sprintf("%s/deployments/%s", baseURI, dr.ID)
+		url := fmt.Sprintf("%s/deployments/%d", baseURI, dr.ID)
 		doDELETE(url)
 	}
 }
@@ -291,7 +291,7 @@ func TestGetDeployment(t *testing.T) {
 		panic(err)
 	}
 
-	resp, _ := doGET(fmt.Sprintf("%v/deployments/%s", baseURI, drs[0].ID))
+	resp, _ := doGET(fmt.Sprintf("%v/deployments/%d", baseURI, drs[0].ID))
 	defer resp.Body.Close()
 
 	dr := &agent.DeploymentResponseFull{}
@@ -330,7 +330,7 @@ func TestDeleteDeployment(t *testing.T) {
 	}
 	assert.Equal(t, 1, len(drs))
 
-	url := fmt.Sprintf("%s/deployments/%s", baseURI, drs[0].ID)
+	url := fmt.Sprintf("%s/deployments/%d", baseURI, drs[0].ID)
 	doDELETE(url)
 
 	resp, _ := doGET(baseURI + "/deployments")
