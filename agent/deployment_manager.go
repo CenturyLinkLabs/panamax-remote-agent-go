@@ -46,9 +46,15 @@ func (dm DeploymentManager) CreateDeployment(body io.Reader) (DeploymentResponse
 	jd := json.NewDecoder(body)
 	jd.Decode(deployment)
 
-	dm.Adapter.CreateServices(deployment.MergedImages())
+	ars := dm.Adapter.CreateServices(deployment.MergedImages())
 
-	dr, err := dm.Repo.Save(deployment)
+	sIDs := make([]string, len(ars))
+
+	for i, ar := range ars {
+		sIDs[i] = ar.ID
+	}
+
+	dr, err := dm.Repo.Save(deployment, sIDs)
 	if err != nil {
 		return DeploymentResponseLite{}, err
 	}

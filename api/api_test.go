@@ -175,6 +175,19 @@ func TestCreateDeployment(t *testing.T) {
 			},
 		}, *imgs)
 
+		drs := agent.AdapterResponses{
+			{ID: "wp-pod"},
+			{ID: "mysql-pod"},
+		}
+
+		drsj, err := json.Marshal(drs)
+		if err != nil {
+			panic(err)
+		}
+
+		w.WriteHeader(http.StatusCreated)
+		w.Write(drsj)
+
 	}))
 	defer teardown()
 
@@ -246,8 +259,7 @@ func TestCreateDeployment(t *testing.T) {
 	assert.NotNil(t, dr.ID)
 	assert.Equal(t, "fooya", dr.Name)
 	assert.Equal(t, true, dr.Redeployable)
-	// TODO see below for adapter stuff
-	// assert.Equal(t, []string{"db-1", "wp-pod", "mysql-pod"}, dr.ServiceIDs)
+	assert.Equal(t, []string{"wp-pod", "mysql-pod"}, dr.ServiceIDs)
 }
 
 func TestListDeploymentsWhenOneExists(t *testing.T) {
@@ -270,8 +282,7 @@ func TestListDeploymentsWhenOneExists(t *testing.T) {
 	assert.Equal(t, 1, len(drs))
 	assert.Equal(t, "fooya", dr.Name)
 	assert.Equal(t, true, dr.Redeployable)
-	// TODO see below for adapter stuff
-	// assert.Equal(t, []string{"db-1", "wp-pod", "mysql-pod"}, dr.ServiceIDs)
+	assert.Equal(t, []string{"wp-pod", "mysql-pod"}, dr.ServiceIDs)
 }
 
 func TestGetDeployment(t *testing.T) {

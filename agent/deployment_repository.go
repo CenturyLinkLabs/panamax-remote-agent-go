@@ -92,15 +92,19 @@ func (dRepo DeploymentRepo) All() (DeploymentResponses, error) {
 	return drs, err
 }
 
-func (dRepo DeploymentRepo) Save(d *Deployment) (DeploymentResponseLite, error) {
+func (dRepo DeploymentRepo) Save(d *Deployment, sIDs []string) (DeploymentResponseLite, error) {
 	// decode the template so we can persist it
 	b, err := json.Marshal(d.Template)
 	template := string(b)
 
+	sb, err := json.Marshal(sIDs)
+	sj := string(sb)
+
 	res, err := dRepo.DB.Exec(
-		"INSERT INTO deployments (name, template) VALUES (?,?)",
+		"INSERT INTO deployments (name, template, service_ids) VALUES (?,?,?)",
 		d.Template.Name,
 		template,
+		sj,
 	)
 	rID, err := res.LastInsertId()
 	if err != nil {
@@ -111,6 +115,7 @@ func (dRepo DeploymentRepo) Save(d *Deployment) (DeploymentResponseLite, error) 
 		ID:           int(rID),
 		Name:         d.Template.Name,
 		Redeployable: template != "",
+		ServiceIDs:   sIDs,
 	}
 
 	return dr, nil
