@@ -124,16 +124,9 @@ func doDELETE(url string) (*http.Response, error) {
 }
 
 func removeAll() {
-	res, _ := doGET(baseURI + "/deployments")
-	defer res.Body.Close()
+	drs := getAllDeployments()
 
-	drs := &[]agent.DeploymentResponseLite{}
-	jd := json.NewDecoder(res.Body)
-	if err := jd.Decode(drs); err != nil {
-		panic(err)
-	}
-
-	for _, dr := range *drs {
+	for _, dr := range drs {
 		url := fmt.Sprintf("%s/deployments/%d", baseURI, dr.ID)
 		doDELETE(url)
 	}
@@ -339,13 +332,7 @@ func TestGetDeployment(t *testing.T) {
 
 	defer teardown()
 
-	res, _ := doGET(baseURI + "/deployments")
-	defer res.Body.Close()
-	drs := make(agent.DeploymentResponses, 0)
-	jd := json.NewDecoder(res.Body)
-	if err := jd.Decode(&drs); err != nil {
-		panic(err)
-	}
+	drs := getAllDeployments()
 
 	resp, _ := doGET(fmt.Sprintf("%v/deployments/%d", baseURI, drs[0].ID))
 	defer resp.Body.Close()
@@ -434,23 +421,15 @@ func TestDeleteDeployment(t *testing.T) {
 
 	defer teardown()
 
-	res, _ := doGET(baseURI + "/deployments")
-	defer res.Body.Close()
-	drs := make(agent.DeploymentResponses, 0)
-	jd := json.NewDecoder(res.Body)
-	if err := jd.Decode(&drs); err != nil {
-		panic(err)
-	}
+	drs := getAllDeployments()
 
 	url := fmt.Sprintf("%s/deployments/%d", baseURI, drs[0].ID)
 	doDELETE(url)
 
-	resp, _ := doGET(baseURI + "/deployments")
-	body, _ := ioutil.ReadAll(resp.Body)
-	defer res.Body.Close()
+	drsAfterDelete := getAllDeployments()
 
 	assert.Equal(t, 1, len(drs))
-	assert.Equal(t, "[]", strings.TrimSpace(string(body)))
+	assert.Equal(t, 0, len(drsAfterDelete))
 	assert.Equal(t, []string{"DELETE", "DELETE", "DELETE"}, calledMethods)
 	assert.Equal(t, len(calledURIs), 3)
 	assert.Contains(t, calledURIs, "/v1/services/wp-pod")
