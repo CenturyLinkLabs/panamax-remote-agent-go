@@ -39,6 +39,14 @@ func (ad *Adapter) CreateServices(sIDs []Image) AdapterResponses {
 func (ad *Adapter) GetService(sid string) Service {
 	resp, _ := ad.Client.Get(ad.servicesPath(sid))
 
+	if resp.StatusCode == http.StatusNotFound {
+		return Service{ID: sid, ActualState: "not found"}
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return Service{ID: sid, ActualState: "error"}
+	}
+
 	srvc := &Service{}
 	jd := json.NewDecoder(resp.Body)
 	jd.Decode(srvc)

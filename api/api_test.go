@@ -173,11 +173,16 @@ func TestCreateDeployment(t *testing.T) {
 				},
 				Deployment: agent.DeploymentSettings{Count: 0},
 			},
+			{
+				Name:   "honeybadger",
+				Source: "honey/badger",
+			},
 		}, *imgs)
 
 		drs := agent.AdapterResponses{
 			{ID: "wp-pod"},
 			{ID: "mysql-pod"},
+			{ID: "honey-pod"},
 		}
 
 		drsj, err := json.Marshal(drs)
@@ -237,6 +242,10 @@ func TestCreateDeployment(t *testing.T) {
 						{ "host_port":3306, "container_port":3306 }
 					],
 					"command":"./run.sh"
+				},
+				{
+					"name":"honeybadger",
+					"source":"honey/badger"
 				}
 			]
 		}
@@ -259,7 +268,7 @@ func TestCreateDeployment(t *testing.T) {
 	assert.NotNil(t, dr.ID)
 	assert.Equal(t, "fooya", dr.Name)
 	assert.Equal(t, true, dr.Redeployable)
-	assert.Equal(t, []string{"wp-pod", "mysql-pod"}, dr.ServiceIDs)
+	assert.Equal(t, []string{"wp-pod", "mysql-pod", "honey-pod"}, dr.ServiceIDs)
 }
 
 func TestListDeploymentsWhenOneExists(t *testing.T) {
@@ -282,22 +291,23 @@ func TestListDeploymentsWhenOneExists(t *testing.T) {
 	assert.Equal(t, 1, len(drs))
 	assert.Equal(t, "fooya", dr.Name)
 	assert.Equal(t, true, dr.Redeployable)
-	assert.Equal(t, []string{"wp-pod", "mysql-pod"}, dr.ServiceIDs)
+	assert.Equal(t, []string{"wp-pod", "mysql-pod", "honey-pod"}, dr.ServiceIDs)
 }
 
 func TestGetDeployment(t *testing.T) {
 	setup(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var srvc agent.Service
+		var st int
 		if r.URL.Path == "/v1/services/wp-pod" {
 			srvc = agent.Service{
 				ActualState: "Running",
 				ID:          "wp-pod",
 			}
+			st = http.StatusOK
+		} else if r.URL.Path == "/v1/services/honey-pod" {
+			st = http.StatusInternalServerError
 		} else {
-			srvc = agent.Service{
-				ActualState: "Waiting",
-				ID:          "mysql-pod",
-			}
+			st = http.StatusNotFound
 		}
 
 		srvcj, err := json.Marshal(srvc)
@@ -305,7 +315,7 @@ func TestGetDeployment(t *testing.T) {
 			panic(err)
 		}
 
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(st)
 		w.Write(srvcj)
 	}))
 
@@ -332,7 +342,7 @@ func TestGetDeployment(t *testing.T) {
 	assert.Equal(t, "application/json; charset=utf-8", resp.Header["Content-Type"][0])
 	assert.Equal(t, "fooya", dr.Name)
 	assert.Equal(t, true, dr.Redeployable)
-	assert.Equal(t, 2, len(dr.Status.Services))
+	assert.Equal(t, 3, len(dr.Status.Services))
 
 	sis := make([]string, 0)
 	sas := make([]string, 0)
@@ -341,8 +351,8 @@ func TestGetDeployment(t *testing.T) {
 		sas = append(sas, s.ActualState)
 	}
 
-	assert.Equal(t, []string{"Running", "Waiting"}, sas)
-	assert.Equal(t, []string{"wp-pod", "mysql-pod"}, sis)
+	assert.Equal(t, []string{"Running", "not found", "error"}, sas)
+	assert.Equal(t, []string{"wp-pod", "mysql-pod", "honey-pod"}, sis)
 }
 
 func TestDeleteDeployment(t *testing.T) {
