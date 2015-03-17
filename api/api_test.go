@@ -356,7 +356,16 @@ func TestGetDeployment(t *testing.T) {
 }
 
 func TestDeleteDeployment(t *testing.T) {
-	setup(nil)
+	calledURIs := make([]string, 0)
+	calledMethods := make([]string, 0)
+
+	setup(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calledMethods = append(calledMethods, r.Method)
+		calledURIs = append(calledURIs, r.URL.Path)
+
+		w.WriteHeader(http.StatusNoContent)
+	}))
+
 	defer teardown()
 
 	res, _ := doGET(baseURI + "/deployments")
@@ -366,7 +375,6 @@ func TestDeleteDeployment(t *testing.T) {
 	if err := jd.Decode(&drs); err != nil {
 		panic(err)
 	}
-	assert.Equal(t, 1, len(drs))
 
 	url := fmt.Sprintf("%s/deployments/%d", baseURI, drs[0].ID)
 	doDELETE(url)
@@ -374,7 +382,14 @@ func TestDeleteDeployment(t *testing.T) {
 	resp, _ := doGET(baseURI + "/deployments")
 	body, _ := ioutil.ReadAll(resp.Body)
 	defer res.Body.Close()
+
+	assert.Equal(t, 1, len(drs))
 	assert.Equal(t, "[]", strings.TrimSpace(string(body)))
+	assert.Equal(t, []string{"DELETE", "DELETE", "DELETE"}, calledMethods)
+	assert.Equal(t, len(calledURIs), 3)
+	assert.Contains(t, calledURIs, "/v1/services/wp-pod")
+	assert.Contains(t, calledURIs, "/v1/services/mysql-pod")
+	assert.Contains(t, calledURIs, "/v1/services/honey-pod")
 }
 
 // func TestReDeploy(t *testing.T) {

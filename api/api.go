@@ -35,7 +35,12 @@ func CreateDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http
 
 func DeleteDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
 	uvars := mux.Vars(r)
-	if err := dm.DeleteDeployment(uvars["id"]); err != nil {
+	dr, err := dm.GetDeployment(uvars["id"])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := dm.DeleteDeployment(dr); err != nil {
 		log.Fatal(err)
 	}
 
@@ -44,9 +49,9 @@ func DeleteDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http
 
 func ShowDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
 	uvars := mux.Vars(r)
-	dr, err := dm.GetDeployment(uvars["id"])
+	dr, err := dm.GetFullDeployment(uvars["id"])
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	json.NewEncoder(w).Encode(dr)

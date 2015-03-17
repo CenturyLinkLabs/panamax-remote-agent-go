@@ -54,6 +54,22 @@ func (ad *Adapter) GetService(sid string) Service {
 	return *srvc
 }
 
+func (ad *Adapter) DeleteService(sid string) error {
+	req, err := http.NewRequest("DELETE", ad.servicesPath(sid), nil)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = ad.Client.Do(req)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (ad *Adapter) servicesPath(id string) string {
 	return ad.Endpoint + "/v1/services/" + id
 }

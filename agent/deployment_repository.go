@@ -126,10 +126,10 @@ func (dRepo DeploymentRepo) Save(d *Deployment, sIDs []string) (DeploymentRespon
 	return dr, nil
 }
 
-func (dRepo DeploymentRepo) Remove(qid string) error {
+func (dRepo DeploymentRepo) Remove(id int) error {
 	_, err := dRepo.DB.Exec(
 		"DELETE FROM deployments WHERE id = ?",
-		qid,
+		id,
 	)
 	return err
 }
