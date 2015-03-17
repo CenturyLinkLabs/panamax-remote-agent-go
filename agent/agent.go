@@ -103,12 +103,12 @@ type Template struct {
 	// TODO: Description?
 }
 
-type service struct {
+type Service struct {
 	ID          string `json:"id"`
 	ActualState string `json:"actualState"`
 }
 
-type Services []service
+type Services []Service
 
 type ServiceStatus struct {
 	Services Services `json:"services"`

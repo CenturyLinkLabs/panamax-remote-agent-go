@@ -28,10 +28,11 @@ func NewDeploymentRepo(dbPath string) DeploymentRepo {
 	}
 }
 
-func (dRepo DeploymentRepo) FindById(qid string) (DeploymentResponseFull, error) {
+func (dRepo DeploymentRepo) FindById(qid string) (DeploymentResponseLite, error) {
 	var id int
 	var name string
 	var sids sql.NullString // TODO: make this column NOT NULL
+	var sidc []string
 	var template string
 
 	err := dRepo.DB.QueryRow(
@@ -40,13 +41,17 @@ func (dRepo DeploymentRepo) FindById(qid string) (DeploymentResponseFull, error)
 	).Scan(&id, &name, &template, &sids)
 	if err != nil {
 		// TODO: we could handle ErrNoRows differently, but for now that's just an error to me
-		return DeploymentResponseFull{}, err
+		return DeploymentResponseLite{}, err
+	}
+	if sids.Valid {
+		json.Unmarshal([]byte(sids.String), &sidc)
 	}
 
-	dr := DeploymentResponseFull{
+	dr := DeploymentResponseLite{
 		ID:           id,
 		Name:         name,
 		Redeployable: template != "",
+		ServiceIDs:   sidc,
 	}
 
 	return dr, nil

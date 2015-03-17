@@ -286,7 +286,29 @@ func TestListDeploymentsWhenOneExists(t *testing.T) {
 }
 
 func TestGetDeployment(t *testing.T) {
-	setup(nil)
+	setup(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var srvc agent.Service
+		if r.URL.Path == "/v1/services/wp-pod" {
+			srvc = agent.Service{
+				ActualState: "Running",
+				ID:          "wp-pod",
+			}
+		} else {
+			srvc = agent.Service{
+				ActualState: "Waiting",
+				ID:          "mysql-pod",
+			}
+		}
+
+		srvcj, err := json.Marshal(srvc)
+		if err != nil {
+			panic(err)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(srvcj)
+	}))
+
 	defer teardown()
 
 	res, _ := doGET(baseURI + "/deployments")
@@ -310,17 +332,17 @@ func TestGetDeployment(t *testing.T) {
 	assert.Equal(t, "application/json; charset=utf-8", resp.Header["Content-Type"][0])
 	assert.Equal(t, "fooya", dr.Name)
 	assert.Equal(t, true, dr.Redeployable)
-	// TODO: test all this once we have the fake adapter
-	// assert.Equal(t, 3, len(dr.Status.Services))
+	assert.Equal(t, 2, len(dr.Status.Services))
 
-	// sis := make([]string, 0)
-	// sas := make([]string, 0)
-	// for _, s := range dr.Status.Services {
-	//   sis = append(sis, s.ID)
-	//   sas = append(sas, s.ActualState)
-	// }
+	sis := make([]string, 0)
+	sas := make([]string, 0)
+	for _, s := range dr.Status.Services {
+		sis = append(sis, s.ID)
+		sas = append(sas, s.ActualState)
+	}
 
-	// assert.Equal(t, []string{"not found", "Running", "Waiting"}, sas)
+	assert.Equal(t, []string{"Running", "Waiting"}, sas)
+	assert.Equal(t, []string{"wp-pod", "mysql-pod"}, sis)
 }
 
 func TestDeleteDeployment(t *testing.T) {

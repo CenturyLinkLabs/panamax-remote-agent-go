@@ -36,6 +36,16 @@ func (ad *Adapter) CreateServices(sIDs []Image) AdapterResponses {
 	return *ars
 }
 
+func (ad *Adapter) GetService(sid string) Service {
+	resp, _ := ad.Client.Get(ad.servicesPath(sid))
+
+	srvc := &Service{}
+	jd := json.NewDecoder(resp.Body)
+	jd.Decode(srvc)
+
+	return *srvc
+}
+
 func (ad *Adapter) servicesPath(id string) string {
 	return ad.Endpoint + "/v1/services/" + id
 }

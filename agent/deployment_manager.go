@@ -27,9 +27,21 @@ func (dm DeploymentManager) ListDeployments() (DeploymentResponses, error) {
 
 // TODO: maybe qid should be an int?
 func (dm DeploymentManager) GetDeployment(qid string) (DeploymentResponseFull, error) {
-	dr, err := dm.Repo.FindById(qid)
+	drl, err := dm.Repo.FindById(qid)
 	if err != nil {
 		return DeploymentResponseFull{}, err
+	}
+	srvs := make(Services, len(drl.ServiceIDs))
+	for i, sID := range drl.ServiceIDs {
+		srvc := dm.Adapter.GetService(sID)
+		srvs[i] = srvc
+	}
+
+	dr := DeploymentResponseFull{
+		Name:         drl.Name,
+		ID:           drl.ID,
+		Redeployable: drl.Redeployable,
+		Status:       ServiceStatus{Services: srvs},
 	}
 
 	return dr, nil
