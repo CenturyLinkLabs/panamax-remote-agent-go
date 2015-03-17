@@ -47,10 +47,14 @@ func (dRepo DeploymentRepo) FindById(qid string) (DeploymentResponseLite, error)
 		json.Unmarshal([]byte(sids.String), &sidc)
 	}
 
+	tpl := &Template{}
+	json.Unmarshal([]byte(template), tpl)
+
 	dr := DeploymentResponseLite{
 		ID:           id,
 		Name:         name,
 		Redeployable: template != "",
+		Template:     *tpl,
 		ServiceIDs:   sidc,
 	}
 
@@ -82,11 +86,15 @@ func (dRepo DeploymentRepo) All() (DeploymentResponses, error) {
 			json.Unmarshal([]byte(sids.String), &sidc)
 		}
 
+		tpl := &Template{}
+		json.Unmarshal([]byte(template), tpl)
+
 		drs = append(drs, DeploymentResponseLite{
 			ID:           id,
 			Name:         name,
 			ServiceIDs:   sidc,
 			Redeployable: template != "",
+			Template:     *tpl,
 		})
 	}
 
@@ -121,6 +129,7 @@ func (dRepo DeploymentRepo) Save(d *Deployment, sIDs []string) (DeploymentRespon
 		Name:         d.Template.Name,
 		Redeployable: template != "",
 		ServiceIDs:   sIDs,
+		Template:     d.Template,
 	}
 
 	return dr, nil

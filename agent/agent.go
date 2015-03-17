@@ -26,6 +26,7 @@ type DeploymentResponseLite struct {
 	Name         string   `json:"name"`
 	Redeployable bool     `json:"redeployable"`
 	ServiceIDs   []string `json:"service_ids"`
+	Template     Template `json:"-"`
 }
 
 type DeploymentResponseFull struct {

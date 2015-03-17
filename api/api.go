@@ -56,3 +56,16 @@ func ShowDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.R
 
 	json.NewEncoder(w).Encode(dr)
 }
+
+func ReDeploy(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
+	uvars := mux.Vars(r)
+	dr, err := dm.GetDeployment(uvars["id"])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rdr, err := dm.ReDeploy(dr)
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(rdr)
+}

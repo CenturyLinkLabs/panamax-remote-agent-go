@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -41,6 +42,23 @@ func setup(dunk http.Handler) {
 
 func teardown() {
 	server.Close()
+}
+
+func getAllDeployments() agent.DeploymentResponses {
+
+	res, err := doGET(baseURI + "/deployments")
+	if err != nil {
+		panic(err)
+	}
+	defer res.Body.Close()
+
+	drs := make(agent.DeploymentResponses, 0)
+	jd := json.NewDecoder(res.Body)
+	if err := jd.Decode(&drs); err != nil {
+		panic(err)
+	}
+
+	return drs
 }
 
 func doGET(url string) (*http.Response, error) {
@@ -355,6 +373,54 @@ func TestGetDeployment(t *testing.T) {
 	assert.Equal(t, []string{"wp-pod", "mysql-pod", "honey-pod"}, sis)
 }
 
+func TestReDeploy(t *testing.T) {
+	setup(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			drs := agent.AdapterResponses{
+				{ID: "wp-pod"},
+				{ID: "mysql-pod"},
+				{ID: "honey-pod"},
+			}
+
+			drsj, err := json.Marshal(drs)
+			if err != nil {
+				panic(err)
+			}
+
+			w.WriteHeader(http.StatusCreated)
+			w.Write(drsj)
+		}
+	}))
+
+	defer teardown()
+
+	drsPreRedeploy := getAllDeployments()
+
+	ogID := drsPreRedeploy[0].ID
+	resp, err := doPOST(fmt.Sprintf("%s/deployments/%d/redeploy", baseURI, ogID), &bytes.Buffer{})
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	dr := &agent.DeploymentResponseLite{}
+	jdd := json.NewDecoder(resp.Body)
+	if err := jdd.Decode(dr); err != nil {
+		panic(err)
+	}
+
+	drsPostRedeploy := getAllDeployments()
+
+	assert.Equal(t, 1, len(drsPreRedeploy))
+	assert.Equal(t, 1, len(drsPostRedeploy))
+	assert.Equal(t, 201, resp.StatusCode)
+	assert.Equal(t, "application/json; charset=utf-8", resp.Header["Content-Type"][0])
+	assert.Equal(t, "fooya", dr.Name)
+	assert.NotEqual(t, ogID, dr.ID)
+	assert.Equal(t, true, dr.Redeployable)
+	assert.Equal(t, 3, len(dr.ServiceIDs))
+}
+
 func TestDeleteDeployment(t *testing.T) {
 	calledURIs := make([]string, 0)
 	calledMethods := make([]string, 0)
@@ -391,28 +457,3 @@ func TestDeleteDeployment(t *testing.T) {
 	assert.Contains(t, calledURIs, "/v1/services/mysql-pod")
 	assert.Contains(t, calledURIs, "/v1/services/honey-pod")
 }
-
-// func TestReDeploy(t *testing.T) {
-//   res, _ := doGET(baseURI + "/deployments")
-//   defer res.Body.Close()
-//   drs := make(DeploymentResponses, 0)
-//   jd := json.NewDecoder(res.Body)
-//   if err := jd.Decode(&drs); err != nil {
-//     panic(err)
-//   }
-
-//   resp, _ := doPOST(fmt.Sprintf("%v/deployments/%d/redeploy", baseURI, drs[0].ID), &bytes.Buffer{})
-//   defer resp.Body.Close()
-
-//   dr := &DeploymentResponseLite{}
-//   jdd := json.NewDecoder(resp.Body)
-//   if err := jdd.Decode(dr); err != nil {
-//     panic(err)
-//   }
-
-//   assert.Equal(t, 201, resp.StatusCode)
-//   assert.Equal(t, "application/json; charset=utf-8", resp.Header["Content-Type"][0])
-//   assert.Equal(t, "foo", dr.Name)
-//   assert.Equal(t, true, dr.Redeployable)
-//   assert.Equal(t, 3, len(dr.ServiceIDs))
-// }

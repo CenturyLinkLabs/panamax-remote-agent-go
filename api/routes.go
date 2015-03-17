@@ -37,4 +37,10 @@ var routes = Routes{
 		"/deployments/{id}",
 		DeleteDeployment,
 	},
+	{
+		"ReDeploy",
+		"POST",
+		"/deployments/{id}/redeploy",
+		ReDeploy,
+	},
 }

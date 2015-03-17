@@ -3,6 +3,7 @@ package agent
 import (
 	"encoding/json"
 	"io"
+	"strings"
 )
 
 type DeploymentManager struct {
@@ -87,4 +88,21 @@ func (dm DeploymentManager) CreateDeployment(body io.Reader) (DeploymentResponse
 	}
 
 	return dr, nil
+}
+
+func (dm DeploymentManager) ReDeploy(dr DeploymentResponseLite) (DeploymentResponseLite, error) {
+
+	if err := dm.DeleteDeployment(dr); err != nil {
+		return DeploymentResponseLite{}, err
+	}
+
+	tBuff, _ := json.Marshal(Deployment{Template: dr.Template})
+	tr := strings.NewReader(string(tBuff))
+
+	drl, err := dm.CreateDeployment(tr)
+	if err != nil {
+		return DeploymentResponseLite{}, err
+	}
+
+	return drl, nil
 }
