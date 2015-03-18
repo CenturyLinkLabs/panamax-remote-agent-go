@@ -85,7 +85,7 @@ func (img *Image) overrideDeployment(o Image) {
 
 func (img *Image) overrideEnv(o Image) {
 	//TODO add the extra override envs that didn't exist in base
-	envs := make([]Environment, 0)
+	var envs []Environment
 
 	for _, env := range img.Environment {
 		for _, oEnv := range o.Environment {

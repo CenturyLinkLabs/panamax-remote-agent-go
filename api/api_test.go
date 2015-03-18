@@ -27,8 +27,8 @@ func init() {
 	dRepo = agent.NewDeploymentRepo("../db/agent_test.db")
 }
 
-func setup(dunk http.Handler) {
-	adapterServer = httptest.NewServer(dunk)
+func setup(hdlr http.Handler) {
+	adapterServer = httptest.NewServer(hdlr)
 	ad := agent.NewAdapter(adapterServer.URL)
 	dm, err := agent.NewDeploymentManager(dRepo, ad)
 	if err != nil {
@@ -346,8 +346,8 @@ func TestGetDeployment(t *testing.T) {
 		panic(err)
 	}
 
-	sis := make([]string, 0)
-	sas := make([]string, 0)
+	var sis []string
+	var sas []string
 	for _, s := range dr.Status.Services {
 		sis = append(sis, s.ID)
 		sas = append(sas, s.ActualState)
@@ -412,8 +412,8 @@ func TestReDeploy(t *testing.T) {
 }
 
 func TestDeleteDeployment(t *testing.T) {
-	calledURIs := make([]string, 0)
-	calledMethods := make([]string, 0)
+	var calledURIs []string
+	var calledMethods []string
 
 	setup(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		calledMethods = append(calledMethods, r.Method)

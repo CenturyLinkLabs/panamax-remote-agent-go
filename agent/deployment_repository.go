@@ -28,7 +28,7 @@ func NewDeploymentRepo(dbPath string) DeploymentRepo {
 	}
 }
 
-func (dRepo DeploymentRepo) FindById(qid string) (DeploymentResponseLite, error) {
+func (dRepo DeploymentRepo) FindByID(qid string) (DeploymentResponseLite, error) {
 	var id int
 	var name string
 	var sids sql.NullString // TODO: make this column NOT NULL

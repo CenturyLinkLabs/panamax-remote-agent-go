@@ -51,7 +51,7 @@ func (dm DeploymentManager) GetFullDeployment(qid string) (DeploymentResponseFul
 }
 
 func (dm DeploymentManager) GetDeployment(qid string) (DeploymentResponseLite, error) {
-	drl, err := dm.Repo.FindById(qid)
+	drl, err := dm.Repo.FindByID(qid)
 	if err != nil {
 		return DeploymentResponseLite{}, err
 	}
