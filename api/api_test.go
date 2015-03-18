@@ -148,47 +148,14 @@ func TestListDeploymentsWhenNoDeploymentsExist(t *testing.T) {
 }
 
 func TestCreateDeployment(t *testing.T) {
+	var resImgs []agent.Image
 	setup(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jd := json.NewDecoder(r.Body)
 		imgs := &[]agent.Image{}
 		if err := jd.Decode(imgs); err != nil {
 			panic(err)
 		}
-
-		assert.Equal(t, []agent.Image{
-			{
-				Name:    "wp",
-				Source:  "centurylink/wordpress:3.9.1",
-				Command: "./run.sh",
-				Links: []agent.Link{
-					{Service: "mysql", Alias: "DB_1"},
-				},
-				Ports: []agent.Port{
-					agent.Port{HostPort: 8000, ContainerPort: 80},
-				},
-				Environment: []agent.Environment{
-					{Variable: "DB_PASSWORD", Value: "pass@word02"},
-					{Variable: "DB_NAME", Value: "wordpress"},
-				},
-				Deployment: agent.DeploymentSettings{Count: 1},
-			},
-			{
-				Name:    "mysql",
-				Source:  "centurylink/mysql:5.5",
-				Command: "./run.sh",
-				Ports: []agent.Port{
-					{HostPort: 3306, ContainerPort: 3306},
-				},
-				Environment: []agent.Environment{
-					{Variable: "MYSQL_ROOT_PASSWORD", Value: "pass@word02"},
-				},
-				Deployment: agent.DeploymentSettings{Count: 0},
-			},
-			{
-				Name:   "honeybadger",
-				Source: "honey/badger",
-			},
-		}, *imgs)
+		resImgs = *imgs
 
 		drs := agent.AdapterResponses{
 			{ID: "wp-pod"},
@@ -274,12 +241,48 @@ func TestCreateDeployment(t *testing.T) {
 		panic(err)
 	}
 
+	expImgs := []agent.Image{
+		{
+			Name:    "wp",
+			Source:  "centurylink/wordpress:3.9.1",
+			Command: "./run.sh",
+			Links: []agent.Link{
+				{Service: "mysql", Alias: "DB_1"},
+			},
+			Ports: []agent.Port{
+				agent.Port{HostPort: 8000, ContainerPort: 80},
+			},
+			Environment: []agent.Environment{
+				{Variable: "DB_PASSWORD", Value: "pass@word02"},
+				{Variable: "DB_NAME", Value: "wordpress"},
+			},
+			Deployment: agent.DeploymentSettings{Count: 1},
+		},
+		{
+			Name:    "mysql",
+			Source:  "centurylink/mysql:5.5",
+			Command: "./run.sh",
+			Ports: []agent.Port{
+				{HostPort: 3306, ContainerPort: 3306},
+			},
+			Environment: []agent.Environment{
+				{Variable: "MYSQL_ROOT_PASSWORD", Value: "pass@word02"},
+			},
+			Deployment: agent.DeploymentSettings{Count: 0},
+		},
+		{
+			Name:   "honeybadger",
+			Source: "honey/badger",
+		},
+	}
+
 	assert.Equal(t, 201, res.StatusCode)
 	assert.Equal(t, "application/json; charset=utf-8", res.Header["Content-Type"][0])
 	assert.NotNil(t, dr.ID)
 	assert.Equal(t, "fooya", dr.Name)
 	assert.Equal(t, true, dr.Redeployable)
 	assert.Equal(t, []string{"wp-pod", "mysql-pod", "honey-pod"}, dr.ServiceIDs)
+	assert.Equal(t, expImgs, resImgs)
 }
 
 func TestListDeploymentsWhenOneExists(t *testing.T) {
@@ -343,18 +346,18 @@ func TestGetDeployment(t *testing.T) {
 		panic(err)
 	}
 
-	assert.Equal(t, 200, resp.StatusCode)
-	assert.Equal(t, "application/json; charset=utf-8", resp.Header["Content-Type"][0])
-	assert.Equal(t, "fooya", dr.Name)
-	assert.Equal(t, true, dr.Redeployable)
-	assert.Equal(t, 3, len(dr.Status.Services))
-
 	sis := make([]string, 0)
 	sas := make([]string, 0)
 	for _, s := range dr.Status.Services {
 		sis = append(sis, s.ID)
 		sas = append(sas, s.ActualState)
 	}
+
+	assert.Equal(t, 200, resp.StatusCode)
+	assert.Equal(t, "application/json; charset=utf-8", resp.Header["Content-Type"][0])
+	assert.Equal(t, "fooya", dr.Name)
+	assert.Equal(t, true, dr.Redeployable)
+	assert.Equal(t, 3, len(dr.Status.Services))
 
 	assert.Equal(t, []string{"Running", "not found", "error"}, sas)
 	assert.Equal(t, []string{"wp-pod", "mysql-pod", "honey-pod"}, sis)
