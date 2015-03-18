@@ -43,4 +43,10 @@ var routes = Routes{
 		"/deployments/{id}/redeploy",
 		ReDeploy,
 	},
+	{
+		"Metadata",
+		"GET",
+		"/metadata",
+		Metadata,
+	},
 }

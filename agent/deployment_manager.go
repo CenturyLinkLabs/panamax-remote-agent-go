@@ -106,3 +106,16 @@ func (dm DeploymentManager) ReDeploy(dr DeploymentResponseLite) (DeploymentRespo
 
 	return drl, nil
 }
+
+func (dm DeploymentManager) FetchMetadata() (Metadata, error) {
+	adapterMeta, _ := dm.Adapter.FetchMetadata()
+
+	md := Metadata{
+		Agent: struct {
+			Version string `json:"version"`
+		}{Version: "v1"}, // TODO pull this from a const or ENV or something
+		Adapter: adapterMeta,
+	}
+
+	return md, nil
+}

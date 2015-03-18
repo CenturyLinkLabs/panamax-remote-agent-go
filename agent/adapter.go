@@ -70,6 +70,20 @@ func (ad *Adapter) DeleteService(sid string) error {
 	return nil
 }
 
+func (ad *Adapter) FetchMetadata() (interface{}, error) {
+	res, err := ad.Client.Get(ad.Endpoint + "/v1/metadata")
+
+	if err != nil {
+		// return map[string]string, err
+	}
+
+	var r interface{}
+	jd := json.NewDecoder(res.Body)
+	jd.Decode(&r)
+
+	return r, nil
+}
+
 func (ad *Adapter) servicesPath(id string) string {
 	return ad.Endpoint + "/v1/services/" + id
 }

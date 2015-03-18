@@ -69,3 +69,10 @@ func ReDeploy(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(rdr)
 }
+
+func Metadata(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
+	md, _ := dm.FetchMetadata()
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(md)
+}

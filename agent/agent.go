@@ -114,3 +114,10 @@ type Services []Service
 type ServiceStatus struct {
 	Services Services `json:"services"`
 }
+
+type Metadata struct {
+	Agent struct {
+		Version string `json:"version"`
+	} `json:"agent"`
+	Adapter interface{} `json:"adapter"`
+}

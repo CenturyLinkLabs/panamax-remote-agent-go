@@ -436,3 +436,34 @@ func TestDeleteDeployment(t *testing.T) {
 	assert.Contains(t, calledURIs, "/v1/services/mysql-pod")
 	assert.Contains(t, calledURIs, "/v1/services/honey-pod")
 }
+
+func TestGetMetadata(t *testing.T) {
+	setup(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		adMeta := struct {
+			Boo  string
+			Flee string
+		}{
+			Boo:  "yah",
+			Flee: "foo",
+		}
+
+		jsn, _ := json.Marshal(adMeta)
+
+		w.Write(jsn)
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	defer teardown()
+
+	res, err := doGET(baseURI + "/metadata")
+	if err != nil {
+		panic(err)
+	}
+	defer res.Body.Close()
+
+	body, _ := ioutil.ReadAll(res.Body)
+
+	ex := `{"agent":{"version":"v1"},"adapter":{"Boo":"yah","Flee":"foo"}}`
+
+	assert.Equal(t, ex, strings.TrimSpace(string(body)))
+}
