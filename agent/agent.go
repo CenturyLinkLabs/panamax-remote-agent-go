@@ -14,6 +14,7 @@ func (d *Deployment) MergedImages() []Image {
 				tImg.OverrideWith(oImg)
 			}
 		}
+
 		mImgs[i] = tImg
 	}
 	return mImgs
@@ -47,8 +48,8 @@ type Link struct {
 }
 
 type Port struct {
-	HostPort      int `json:"host_port,omitempty"`
-	ContainerPort int `json:"container_port,omitempty"`
+	HostPort      int `json:"hostPort,omitempty"`
+	ContainerPort int `json:"containerPort,omitempty"`
 }
 
 type DeploymentSettings struct {

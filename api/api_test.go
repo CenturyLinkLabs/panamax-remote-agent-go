@@ -202,7 +202,7 @@ func TestCreateDeployment(t *testing.T) {
 						{ "service":"mysql", "alias":"DB_1" }
 					],
 					"ports":[
-						{ "host_port":8000, "container_port":80 }
+						{ "hostPort":8000, "containerPort":80 }
 					],
 					"environment":[
 						{ "variable":"DB_PASSWORD", "value":"pass@word01" },
@@ -217,7 +217,7 @@ func TestCreateDeployment(t *testing.T) {
 						{ "variable":"MYSQL_ROOT_PASSWORD", "value":"pass@word01" }
 					],
 					"ports":[
-						{ "host_port":3306, "container_port":3306 }
+						{ "hostPort":3306, "containerPort":3306 }
 					],
 					"expose": [1234, 5678],
 					"volumes": [
