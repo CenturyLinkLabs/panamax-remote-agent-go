@@ -31,7 +31,7 @@ func NewDeploymentRepo(dbPath string) DeploymentRepo {
 func (dRepo DeploymentRepo) FindByID(qid string) (DeploymentResponseLite, error) {
 	var id int
 	var name string
-	var sids sql.NullString // TODO: make this column NOT NULL
+	var sids string
 	var sidc []string
 	var template string
 
@@ -43,9 +43,7 @@ func (dRepo DeploymentRepo) FindByID(qid string) (DeploymentResponseLite, error)
 		// TODO: we could handle ErrNoRows differently, but for now that's just an error to me
 		return DeploymentResponseLite{}, err
 	}
-	if sids.Valid {
-		json.Unmarshal([]byte(sids.String), &sidc)
-	}
+	json.Unmarshal([]byte(sids), &sidc)
 
 	tpl := &Template{}
 	json.Unmarshal([]byte(template), tpl)
@@ -73,7 +71,7 @@ func (dRepo DeploymentRepo) All() (DeploymentResponses, error) {
 	for rows.Next() {
 		var id int
 		var name string
-		var sids sql.NullString // TODO: should probably just make this NOT NULL
+		var sids string
 		var sidc []string
 		var template string
 
@@ -82,9 +80,7 @@ func (dRepo DeploymentRepo) All() (DeploymentResponses, error) {
 			return DeploymentResponses{}, err
 		}
 
-		if sids.Valid {
-			json.Unmarshal([]byte(sids.String), &sidc)
-		}
+		json.Unmarshal([]byte(sids), &sidc)
 
 		tpl := &Template{}
 		json.Unmarshal([]byte(template), tpl)
