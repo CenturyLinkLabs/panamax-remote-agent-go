@@ -19,31 +19,46 @@ func NewDeploymentManager(dRepo DeploymentRepo, ad Adapter) (DeploymentManager, 
 }
 
 func (dm DeploymentManager) ListDeployments() (DeploymentResponses, error) {
-	drs, err := dm.Repo.All()
+	deps, err := dm.Repo.All()
 	if err != nil {
 		return DeploymentResponses{}, err
 	}
+
+	drs := make(DeploymentResponses, len(deps))
+
+	for i, dep := range deps {
+		dr := DeploymentResponseLite{
+			ID:           dep.ID,
+			Name:         dep.Name,
+			Redeployable: dep.Template != "",
+		}
+		json.Unmarshal([]byte(dep.ServiceIDs), &dr.ServiceIDs)
+		json.Unmarshal([]byte(dep.Template), &dr.Template)
+
+		drs[i] = dr
+	}
+
 	return drs, nil
 }
 
 // TODO: maybe qid should be an int?
 func (dm DeploymentManager) GetFullDeployment(qid string) (DeploymentResponseFull, error) {
-	drl, err := dm.GetDeployment(qid)
+	dep, err := dm.GetDeployment(qid)
 
 	if err != nil {
 		return DeploymentResponseFull{}, err
 	}
 
-	srvs := make(Services, len(drl.ServiceIDs))
-	for i, sID := range drl.ServiceIDs {
+	srvs := make(Services, len(dep.ServiceIDs))
+	for i, sID := range dep.ServiceIDs {
 		srvc := dm.Adapter.GetService(sID)
 		srvs[i] = srvc
 	}
 
 	dr := DeploymentResponseFull{
-		Name:         drl.Name,
-		ID:           drl.ID,
-		Redeployable: drl.Redeployable,
+		Name:         dep.Name,
+		ID:           dep.ID,
+		Redeployable: dep.Redeployable,
 		Status:       ServiceStatus{Services: srvs},
 	}
 
@@ -51,10 +66,19 @@ func (dm DeploymentManager) GetFullDeployment(qid string) (DeploymentResponseFul
 }
 
 func (dm DeploymentManager) GetDeployment(qid string) (DeploymentResponseLite, error) {
-	drl, err := dm.Repo.FindByID(qid)
+	dep, err := dm.Repo.FindByID(qid)
 	if err != nil {
 		return DeploymentResponseLite{}, err
 	}
+
+	drl := DeploymentResponseLite{
+		ID:           dep.ID,
+		Name:         dep.Name,
+		Redeployable: dep.Template != "",
+	}
+
+	json.Unmarshal([]byte(dep.ServiceIDs), &drl.ServiceIDs)
+	json.Unmarshal([]byte(dep.Template), &drl.Template)
 
 	return drl, nil
 }
@@ -82,12 +106,36 @@ func (dm DeploymentManager) CreateDeployment(body io.Reader) (DeploymentResponse
 		sIDs[i] = ar.ID
 	}
 
-	dr, err := dm.Repo.Save(deployment, sIDs)
+	// decode the template so we can persist it
+	b, err := json.Marshal(deployment.Template)
 	if err != nil {
 		return DeploymentResponseLite{}, err
 	}
+	template := string(b)
 
-	return dr, nil
+	sb, err := json.Marshal(sIDs)
+	sj := string(sb)
+
+	dep := Rdeployment{
+		Name:       deployment.Template.Name,
+		Template:   template,
+		ServiceIDs: sj,
+	}
+
+	if err := dm.Repo.Save(&dep); err != nil {
+		return DeploymentResponseLite{}, err
+	}
+
+	drl := DeploymentResponseLite{
+		ID:           dep.ID,
+		Name:         dep.Name,
+		Redeployable: dep.Template != "",
+	}
+
+	json.Unmarshal([]byte(dep.ServiceIDs), &drl.ServiceIDs)
+	json.Unmarshal([]byte(dep.Template), &drl.Template)
+
+	return drl, nil
 }
 
 func (dm DeploymentManager) ReDeploy(dr DeploymentResponseLite) (DeploymentResponseLite, error) {
