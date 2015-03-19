@@ -41,9 +41,7 @@ func (ad *Adapter) GetService(sid string) Service {
 
 	if resp.StatusCode == http.StatusNotFound {
 		return Service{ID: sid, ActualState: "not found"}
-	}
-
-	if resp.StatusCode != http.StatusOK {
+	} else if resp.StatusCode != http.StatusOK {
 		return Service{ID: sid, ActualState: "error"}
 	}
 
@@ -63,11 +61,7 @@ func (ad *Adapter) DeleteService(sid string) error {
 
 	_, err = ad.Client.Do(req)
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (ad *Adapter) FetchMetadata() (interface{}, error) {
