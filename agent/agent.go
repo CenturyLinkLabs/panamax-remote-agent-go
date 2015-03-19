@@ -55,6 +55,11 @@ type DeploymentSettings struct {
 	Count int `json:"count"`
 }
 
+type Volume struct {
+	ContainerPath string `json:"containerPath"`
+	HostPath      string `json:"hostPath"`
+}
+
 type Image struct {
 	Name        string             `json:"name,omitempty"`
 	Source      string             `json:"source,omitempty"`
@@ -63,11 +68,9 @@ type Image struct {
 	Links       []Link             `json:"links,omitempty"`
 	Environment []Environment      `json:"environment,omitempty"`
 	Ports       []Port             `json:"port,omitemptys`
-
-	// Categories
-	// Expose
-	// Volumes
-	// Volumes_from
+	Expose      []int              `json:"expose"`
+	Volumes     []Volume           `json:"volumes"`
+	VolumesFrom []string           `json:"volumesFrom"`
 }
 
 func (img *Image) OverrideWith(o Image) {

@@ -219,6 +219,11 @@ func TestCreateDeployment(t *testing.T) {
 					"ports":[
 						{ "host_port":3306, "container_port":3306 }
 					],
+					"expose": [1234, 5678],
+					"volumes": [
+						{"hostPath":"foo/bar", "containerPath":"/var/bar"}
+					],
+					"volumesFrom":["wp"],
 					"command":"./run.sh"
 				},
 				{
@@ -268,7 +273,9 @@ func TestCreateDeployment(t *testing.T) {
 			Environment: []agent.Environment{
 				{Variable: "MYSQL_ROOT_PASSWORD", Value: "pass@word02"},
 			},
-			Deployment: agent.DeploymentSettings{Count: 0},
+			Expose:      []int{1234, 5678},
+			Volumes:     []agent.Volume{{HostPath: "foo/bar", ContainerPath: "/var/bar"}},
+			VolumesFrom: []string{"wp"},
 		},
 		{
 			Name:   "honeybadger",
@@ -359,8 +366,9 @@ func TestGetDeployment(t *testing.T) {
 	assert.Equal(t, true, dr.Redeployable)
 	assert.Equal(t, 3, len(dr.Status.Services))
 
-	assert.Equal(t, []string{"Running", "not found", "error"}, sas)
-	assert.Equal(t, []string{"wp-pod", "mysql-pod", "honey-pod"}, sis)
+	assert.Contains(t, dr.Status.Services, agent.Service{ID: "wp-pod", ActualState: "Running"})
+	assert.Contains(t, dr.Status.Services, agent.Service{ID: "mysql-pod", ActualState: "not found"})
+	assert.Contains(t, dr.Status.Services, agent.Service{ID: "honey-pod", ActualState: "error"})
 }
 
 func TestReDeploy(t *testing.T) {
