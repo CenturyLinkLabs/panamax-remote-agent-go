@@ -53,7 +53,7 @@ type Port struct {
 }
 
 type DeploymentSettings struct {
-	Count int `json:"count"`
+	Count int `json:"count,omitempty"`
 }
 
 type Volume struct {
