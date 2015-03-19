@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"io"
 	"strings"
+
+	"github.com/CenturyLinkLabs/panamax-remote-agent-go/repo"
 )
 
 type DeploymentManager struct {
-	Repo    DeploymentRepo
+	Repo    repo.DeploymentRepo
 	Adapter Adapter
 }
 
-func NewDeploymentManager(dRepo DeploymentRepo, ad Adapter) (DeploymentManager, error) {
+func NewDeploymentManager(dRepo repo.DeploymentRepo, ad Adapter) (DeploymentManager, error) {
 	return DeploymentManager{
 		Repo:    dRepo,
 		Adapter: ad,
@@ -116,7 +118,7 @@ func (dm DeploymentManager) CreateDeployment(body io.Reader) (DeploymentResponse
 	sb, err := json.Marshal(sIDs)
 	sj := string(sb)
 
-	dep := Rdeployment{
+	dep := repo.Deployment{
 		Name:       deployment.Template.Name,
 		Template:   template,
 		ServiceIDs: sj,

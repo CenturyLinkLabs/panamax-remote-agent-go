@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/CenturyLinkLabs/panamax-remote-agent-go/agent"
+	"github.com/CenturyLinkLabs/panamax-remote-agent-go/repo"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,11 +21,11 @@ var (
 	adapterServer *httptest.Server
 	baseURI       string
 	router        http.Handler
-	dRepo         agent.DeploymentRepo
+	dRepo         repo.DeploymentRepo
 )
 
 func init() {
-	dRepo = agent.NewDeploymentRepo("../db/agent_test.db")
+	dRepo = repo.NewDeploymentRepo("../db/agent_test.db")
 }
 
 func setup(hdlr http.Handler) {

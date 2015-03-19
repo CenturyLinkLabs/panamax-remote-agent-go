@@ -1,4 +1,4 @@
-package agent
+package repo
 
 import (
 	"database/sql"
@@ -27,8 +27,8 @@ func NewDeploymentRepo(dbPath string) DeploymentRepo {
 	}
 }
 
-func (dRepo DeploymentRepo) FindByID(qid string) (Rdeployment, error) {
-	dep := &Rdeployment{}
+func (dRepo DeploymentRepo) FindByID(qid string) (Deployment, error) {
+	dep := &Deployment{}
 
 	err := dRepo.DB.QueryRow(
 		"SELECT id, name, template, service_ids FROM deployments WHERE id = ?",
@@ -36,41 +36,41 @@ func (dRepo DeploymentRepo) FindByID(qid string) (Rdeployment, error) {
 	).Scan(&dep.ID, &dep.Name, &dep.Template, &dep.ServiceIDs)
 	if err != nil {
 		// TODO: we could handle ErrNoRows differently, but for now that's just an error to me
-		return Rdeployment{}, err
+		return Deployment{}, err
 	}
 
 	return *dep, nil
 }
 
-func (dRepo DeploymentRepo) All() ([]Rdeployment, error) {
-	drs := make([]Rdeployment, 0)
+func (dRepo DeploymentRepo) All() ([]Deployment, error) {
+	drs := make([]Deployment, 0)
 
 	rows, err := dRepo.DB.Query("SELECT id, name, template, service_ids FROM deployments")
 	if err != nil {
-		return []Rdeployment{}, err
+		return []Deployment{}, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		dep := &Rdeployment{}
+		dep := &Deployment{}
 
 		err := rows.Scan(&dep.ID, &dep.Name, &dep.Template, &dep.ServiceIDs)
 
 		if err != nil {
-			return []Rdeployment{}, err
+			return []Deployment{}, err
 		}
 
 		drs = append(drs, *dep)
 	}
 
 	if err := rows.Err(); err != nil {
-		return []Rdeployment{}, err
+		return []Deployment{}, err
 	}
 
 	return drs, err
 }
 
-func (dRepo DeploymentRepo) Save(dep *Rdeployment) error {
+func (dRepo DeploymentRepo) Save(dep *Deployment) error {
 	res, err := dRepo.DB.Exec(
 		"INSERT INTO deployments (name, template, service_ids) VALUES (?,?,?)",
 		dep.Name,
@@ -95,8 +95,7 @@ func (dRepo DeploymentRepo) Remove(id int) error {
 	return err
 }
 
-// eventually this can be Repo.Deployment or something
-type Rdeployment struct {
+type Deployment struct {
 	ID         int
 	Name       string
 	ServiceIDs string

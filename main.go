@@ -7,10 +7,11 @@ import (
 
 	"github.com/CenturyLinkLabs/panamax-remote-agent-go/agent"
 	"github.com/CenturyLinkLabs/panamax-remote-agent-go/api"
+	"github.com/CenturyLinkLabs/panamax-remote-agent-go/repo"
 )
 
 func main() {
-	dRepo := agent.NewDeploymentRepo("db/agent.db")
+	dRepo := repo.NewDeploymentRepo("db/agent.db")
 
 	ad := agent.NewAdapter(adapterEndpoint())
 
