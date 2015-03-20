@@ -29,15 +29,14 @@ func (dm DeploymentManager) ListDeployments() (DeploymentResponses, error) {
 	drs := make(DeploymentResponses, len(deps))
 
 	for i, dep := range deps {
-		dr := DeploymentResponseLite{
-			ID:           dep.ID,
-			Name:         dep.Name,
-			Redeployable: dep.Template != "",
-		}
-		json.Unmarshal([]byte(dep.ServiceIDs), &dr.ServiceIDs)
-		json.Unmarshal([]byte(dep.Template), &dr.Template)
+		dr := NewDeploymentResponseLite(
+			dep.ID,
+			dep.Name,
+			dep.Template,
+			dep.ServiceIDs,
+		)
 
-		drs[i] = dr
+		drs[i] = *dr
 	}
 
 	return drs, nil
@@ -73,16 +72,14 @@ func (dm DeploymentManager) GetDeployment(qid string) (DeploymentResponseLite, e
 		return DeploymentResponseLite{}, err
 	}
 
-	drl := DeploymentResponseLite{
-		ID:           dep.ID,
-		Name:         dep.Name,
-		Redeployable: dep.Template != "",
-	}
+	drl := NewDeploymentResponseLite(
+		dep.ID,
+		dep.Name,
+		dep.Template,
+		dep.ServiceIDs,
+	)
 
-	json.Unmarshal([]byte(dep.ServiceIDs), &drl.ServiceIDs)
-	json.Unmarshal([]byte(dep.Template), &drl.Template)
-
-	return drl, nil
+	return *drl, nil
 }
 
 func (dm DeploymentManager) DeleteDeployment(dr DeploymentResponseLite) error {
@@ -128,16 +125,14 @@ func (dm DeploymentManager) CreateDeployment(body io.Reader) (DeploymentResponse
 		return DeploymentResponseLite{}, err
 	}
 
-	drl := DeploymentResponseLite{
-		ID:           dep.ID,
-		Name:         dep.Name,
-		Redeployable: dep.Template != "",
-	}
+	drl := NewDeploymentResponseLite(
+		dep.ID,
+		dep.Name,
+		dep.Template,
+		dep.ServiceIDs,
+	)
 
-	json.Unmarshal([]byte(dep.ServiceIDs), &drl.ServiceIDs)
-	json.Unmarshal([]byte(dep.Template), &drl.Template)
-
-	return drl, nil
+	return *drl, nil
 }
 
 func (dm DeploymentManager) ReDeploy(dr DeploymentResponseLite) (DeploymentResponseLite, error) {
