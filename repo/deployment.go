@@ -27,7 +27,7 @@ func NewDeploymentRepo(dbPath string) DeploymentRepo {
 	}
 }
 
-func (dRepo DeploymentRepo) FindByID(qid string) (Deployment, error) {
+func (dRepo DeploymentRepo) FindByID(qid int) (Deployment, error) {
 	dep := &Deployment{}
 
 	err := dRepo.DB.QueryRow(

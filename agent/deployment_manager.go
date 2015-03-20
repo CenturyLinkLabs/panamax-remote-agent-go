@@ -7,7 +7,7 @@ import (
 )
 
 type DeploymentManager struct {
-	Repo    repo.DeploymentRepo
+	Repo    repo.DeploymentRepo //TODO, this should probably be an interface
 	Adapter Adapter
 }
 
@@ -40,8 +40,7 @@ func (dm DeploymentManager) ListDeployments() (DeploymentResponses, error) {
 	return drs, nil
 }
 
-// TODO: maybe qid should be an int?
-func (dm DeploymentManager) GetFullDeployment(qid string) (DeploymentResponseFull, error) {
+func (dm DeploymentManager) GetFullDeployment(qid int) (DeploymentResponseFull, error) {
 	dep, err := dm.GetDeployment(qid)
 
 	if err != nil {
@@ -64,7 +63,7 @@ func (dm DeploymentManager) GetFullDeployment(qid string) (DeploymentResponseFul
 	return dr, nil
 }
 
-func (dm DeploymentManager) GetDeployment(qid string) (DeploymentResponseLite, error) {
+func (dm DeploymentManager) GetDeployment(qid int) (DeploymentResponseLite, error) {
 	dep, err := dm.Repo.FindByID(qid)
 	if err != nil {
 		return DeploymentResponseLite{}, err
@@ -80,11 +79,22 @@ func (dm DeploymentManager) GetDeployment(qid string) (DeploymentResponseLite, e
 	return *drl, nil
 }
 
-func (dm DeploymentManager) DeleteDeployment(dr DeploymentResponseLite) error {
-	err := dm.Repo.Remove(dr.ID)
+func (dm DeploymentManager) DeleteDeployment(qID int) error {
+	dep, err := dm.Repo.FindByID(qID)
 
-	for _, sID := range dr.ServiceIDs {
+	if err != nil {
+		return err
+	}
+
+	var sIDs []string
+	json.Unmarshal([]byte(dep.ServiceIDs), &sIDs)
+
+	for _, sID := range sIDs {
 		dm.Adapter.DeleteService(sID)
+	}
+
+	if err := dm.Repo.Remove(qID); err != nil {
+		return err
 	}
 
 	return err
@@ -130,9 +140,18 @@ func (dm DeploymentManager) CreateDeployment(depB DeploymentBlueprint) (Deployme
 	return *drl, nil
 }
 
-func (dm DeploymentManager) ReDeploy(dr DeploymentResponseLite) (DeploymentResponseLite, error) {
+func (dm DeploymentManager) ReDeploy(ID int) (DeploymentResponseLite, error) {
 
-	if err := dm.DeleteDeployment(dr); err != nil {
+	dep, err := dm.Repo.FindByID(ID)
+
+	dr := NewDeploymentResponseLite(
+		dep.ID,
+		dep.Name,
+		dep.Template,
+		dep.ServiceIDs,
+	)
+
+	if err := dm.DeleteDeployment(ID); err != nil {
 		return DeploymentResponseLite{}, err
 	}
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/CenturyLinkLabs/panamax-remote-agent-go/agent"
 	"github.com/gorilla/mux"
@@ -38,13 +39,7 @@ func CreateDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http
 }
 
 func DeleteDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
-	uvars := mux.Vars(r)
-	dr, err := dm.GetDeployment(uvars["id"])
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := dm.DeleteDeployment(dr); err != nil {
+	if err := dm.DeleteDeployment(idFromQuery(mux.Vars(r))); err != nil {
 		log.Fatal(err)
 	}
 
@@ -52,8 +47,7 @@ func DeleteDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http
 }
 
 func ShowDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
-	uvars := mux.Vars(r)
-	dr, err := dm.GetFullDeployment(uvars["id"])
+	dr, err := dm.GetFullDeployment(idFromQuery(mux.Vars(r)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,16 +56,13 @@ func ShowDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.R
 }
 
 func ReDeploy(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
-	uvars := mux.Vars(r)
-	dr, err := dm.GetDeployment(uvars["id"])
+	dr, err := dm.ReDeploy(idFromQuery(mux.Vars(r)))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	rdr, err := dm.ReDeploy(dr)
-
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(rdr)
+	json.NewEncoder(w).Encode(dr)
 }
 
 func Metadata(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
@@ -79,4 +70,14 @@ func Metadata(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(md)
+}
+
+func idFromQuery(uvars map[string]string) int {
+	qID, err := strconv.Atoi(uvars["id"])
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return qID
 }
