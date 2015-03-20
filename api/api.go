@@ -19,7 +19,11 @@ func ListDeployments(dm agent.DeploymentManager, w http.ResponseWriter, r *http.
 }
 
 func CreateDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
-	dr, err := dm.CreateDeployment(r.Body)
+	depB := &agent.DeploymentBlueprint{}
+	jd := json.NewDecoder(r.Body)
+	jd.Decode(depB)
+
+	dr, err := dm.CreateDeployment(*depB)
 	if err != nil {
 		log.Fatal(err)
 	}

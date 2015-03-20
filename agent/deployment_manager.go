@@ -2,8 +2,6 @@ package agent
 
 import (
 	"encoding/json"
-	"io"
-	"strings"
 
 	"github.com/CenturyLinkLabs/panamax-remote-agent-go/repo"
 )
@@ -92,12 +90,9 @@ func (dm DeploymentManager) DeleteDeployment(dr DeploymentResponseLite) error {
 	return err
 }
 
-func (dm DeploymentManager) CreateDeployment(body io.Reader) (DeploymentResponseLite, error) {
-	deployment := &Deployment{}
-	jd := json.NewDecoder(body)
-	jd.Decode(deployment)
+func (dm DeploymentManager) CreateDeployment(depB DeploymentBlueprint) (DeploymentResponseLite, error) {
 
-	ars := dm.Adapter.CreateServices(deployment.MergedImages())
+	ars := dm.Adapter.CreateServices(depB.MergedImages())
 
 	sIDs := make([]string, len(ars))
 
@@ -106,7 +101,7 @@ func (dm DeploymentManager) CreateDeployment(body io.Reader) (DeploymentResponse
 	}
 
 	// decode the template so we can persist it
-	b, err := json.Marshal(deployment.Template)
+	b, err := json.Marshal(depB.Template)
 	if err != nil {
 		return DeploymentResponseLite{}, err
 	}
@@ -116,7 +111,7 @@ func (dm DeploymentManager) CreateDeployment(body io.Reader) (DeploymentResponse
 	sj := string(sb)
 
 	dep := repo.Deployment{
-		Name:       deployment.Template.Name,
+		Name:       depB.Template.Name,
 		Template:   template,
 		ServiceIDs: sj,
 	}
@@ -141,10 +136,7 @@ func (dm DeploymentManager) ReDeploy(dr DeploymentResponseLite) (DeploymentRespo
 		return DeploymentResponseLite{}, err
 	}
 
-	tBuff, _ := json.Marshal(Deployment{Template: dr.Template})
-	tr := strings.NewReader(string(tBuff))
-
-	drl, err := dm.CreateDeployment(tr)
+	drl, err := dm.CreateDeployment(DeploymentBlueprint{Template: dr.Template})
 	if err != nil {
 		return DeploymentResponseLite{}, err
 	}

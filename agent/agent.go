@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 )
 
-type Deployment struct {
+type DeploymentBlueprint struct {
 	Override Template `json:"override,omitempty"`
 	Template Template `json:"template,omitempty"`
 }
 
-func (d *Deployment) MergedImages() []Image {
+func (d *DeploymentBlueprint) MergedImages() []Image {
 	mImgs := make([]Image, len(d.Template.Images))
 
 	for i, tImg := range d.Template.Images {
