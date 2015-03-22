@@ -5,6 +5,7 @@ import (
 	// "os"
 	"regexp"
 
+	"github.com/CenturyLinkLabs/panamax-remote-agent-go/adapter"
 	"github.com/CenturyLinkLabs/panamax-remote-agent-go/agent"
 	"github.com/CenturyLinkLabs/panamax-remote-agent-go/api"
 	"github.com/CenturyLinkLabs/panamax-remote-agent-go/repo"
@@ -13,7 +14,7 @@ import (
 func main() {
 	dRepo := repo.NewDeploymentRepo("db/agent.db")
 
-	ad := agent.NewAdapter(adapterEndpoint())
+	ad := adapter.NewClient(adapterEndpoint())
 
 	dm, err := agent.NewDeploymentManager(dRepo, ad)
 	if err != nil {

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/CenturyLinkLabs/panamax-remote-agent-go/adapter"
 	"github.com/CenturyLinkLabs/panamax-remote-agent-go/agent"
 	"github.com/CenturyLinkLabs/panamax-remote-agent-go/repo"
 	"github.com/stretchr/testify/assert"
@@ -30,7 +31,7 @@ func init() {
 
 func setup(hdlr http.Handler) {
 	adapterServer = httptest.NewServer(hdlr)
-	ad := agent.NewAdapter(adapterServer.URL)
+	ad := adapter.NewClient(adapterServer.URL)
 	dm, err := agent.NewDeploymentManager(dRepo, ad)
 	if err != nil {
 		fmt.Println(err)
@@ -158,7 +159,7 @@ func TestCreateDeployment(t *testing.T) {
 		}
 		resImgs = *imgs
 
-		drs := agent.AdapterResponses{
+		drs := []adapter.Service{
 			{ID: "wp-pod"},
 			{ID: "mysql-pod"},
 			{ID: "honey-pod"},
@@ -375,7 +376,7 @@ func TestGetDeployment(t *testing.T) {
 func TestReDeploy(t *testing.T) {
 	setup(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
-			drs := agent.AdapterResponses{
+			drs := []adapter.Service{
 				{ID: "wp-pod"},
 				{ID: "mysql-pod"},
 				{ID: "honey-pod"},

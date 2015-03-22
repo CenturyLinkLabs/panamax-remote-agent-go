@@ -1,20 +1,22 @@
 package agent
 
 import (
+	"bytes"
 	"encoding/json"
 
+	"github.com/CenturyLinkLabs/panamax-remote-agent-go/adapter"
 	"github.com/CenturyLinkLabs/panamax-remote-agent-go/repo"
 )
 
 type DeploymentManager struct {
-	Repo    repo.DeploymentRepo //TODO, this should probably be an interface
-	Adapter Adapter
+	Repo          repo.DeploymentRepo //TODO, this should probably be an interface
+	AdapterClient adapter.Client
 }
 
-func NewDeploymentManager(dRepo repo.DeploymentRepo, ad Adapter) (DeploymentManager, error) {
+func NewDeploymentManager(dRepo repo.DeploymentRepo, ad adapter.Client) (DeploymentManager, error) {
 	return DeploymentManager{
-		Repo:    dRepo,
-		Adapter: ad,
+		Repo:          dRepo,
+		AdapterClient: ad,
 	}, nil
 }
 
@@ -49,8 +51,11 @@ func (dm DeploymentManager) GetFullDeployment(qid int) (DeploymentResponseFull, 
 
 	srvs := make(Services, len(dep.ServiceIDs))
 	for i, sID := range dep.ServiceIDs {
-		srvc := dm.Adapter.GetService(sID)
-		srvs[i] = srvc
+		srvc := dm.AdapterClient.GetService(sID)
+		srvs[i] = Service{
+			ID:          srvc.ID,
+			ActualState: srvc.ActualState,
+		}
 	}
 
 	dr := DeploymentResponseFull{
@@ -90,7 +95,7 @@ func (dm DeploymentManager) DeleteDeployment(qID int) error {
 	json.Unmarshal([]byte(dep.ServiceIDs), &sIDs)
 
 	for _, sID := range sIDs {
-		dm.Adapter.DeleteService(sID)
+		dm.AdapterClient.DeleteService(sID)
 	}
 
 	if err := dm.Repo.Remove(qID); err != nil {
@@ -102,7 +107,14 @@ func (dm DeploymentManager) DeleteDeployment(qID int) error {
 
 func (dm DeploymentManager) CreateDeployment(depB DeploymentBlueprint) (DeploymentResponseLite, error) {
 
-	ars := dm.Adapter.CreateServices(depB.MergedImages())
+	imgs := depB.MergedImages()
+
+	buf := new(bytes.Buffer)
+	if err := json.NewEncoder(buf).Encode(imgs); err != nil {
+		panic(err)
+	}
+
+	ars := dm.AdapterClient.CreateServices(buf)
 
 	sIDs := make([]string, len(ars))
 
@@ -164,7 +176,7 @@ func (dm DeploymentManager) ReDeploy(ID int) (DeploymentResponseLite, error) {
 }
 
 func (dm DeploymentManager) FetchMetadata() (Metadata, error) {
-	adapterMeta, _ := dm.Adapter.FetchMetadata()
+	adapterMeta, _ := dm.AdapterClient.FetchMetadata()
 
 	md := Metadata{
 		Agent: struct {

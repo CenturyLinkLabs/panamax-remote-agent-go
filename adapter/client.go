@@ -1,4 +1,4 @@
-package agent
+package adapter
 
 import (
 	"bytes"
@@ -6,15 +6,16 @@ import (
 	"net/http"
 )
 
-type Adapter struct {
+//TODO: we could break clients into a service client, and metadata client.
+type Client struct {
 	Endpoint string
 	Client   *http.Client
 }
 
-func NewAdapter(ep string) Adapter {
+func NewClient(ep string) Client {
 	client := &http.Client{}
 
-	ad := Adapter{
+	ad := Client{
 		Client:   client,
 		Endpoint: ep,
 	}
@@ -22,21 +23,17 @@ func NewAdapter(ep string) Adapter {
 	return ad
 }
 
-func (ad *Adapter) CreateServices(sIDs []Image) AdapterResponses {
-	buf := new(bytes.Buffer)
-	if err := json.NewEncoder(buf).Encode(sIDs); err != nil {
-		panic(err)
-	}
+func (ad *Client) CreateServices(buf *bytes.Buffer) []Service {
 	resp, _ := ad.Client.Post(ad.servicesPath(""), "application/json", buf)
 
-	ars := &AdapterResponses{}
+	ars := &[]Service{}
 	jd := json.NewDecoder(resp.Body)
 	jd.Decode(ars)
 
 	return *ars
 }
 
-func (ad *Adapter) GetService(sid string) Service {
+func (ad *Client) GetService(sid string) Service {
 	resp, _ := ad.Client.Get(ad.servicesPath(sid))
 
 	if resp.StatusCode == http.StatusNotFound {
@@ -52,7 +49,7 @@ func (ad *Adapter) GetService(sid string) Service {
 	return *srvc
 }
 
-func (ad *Adapter) DeleteService(sid string) error {
+func (ad *Client) DeleteService(sid string) error {
 	req, err := http.NewRequest("DELETE", ad.servicesPath(sid), nil)
 
 	if err != nil {
@@ -64,7 +61,7 @@ func (ad *Adapter) DeleteService(sid string) error {
 	return err
 }
 
-func (ad *Adapter) FetchMetadata() (interface{}, error) {
+func (ad *Client) FetchMetadata() (interface{}, error) {
 	res, err := ad.Client.Get(ad.Endpoint + "/v1/metadata")
 
 	if err != nil {
@@ -78,13 +75,6 @@ func (ad *Adapter) FetchMetadata() (interface{}, error) {
 	return r, nil
 }
 
-func (ad *Adapter) servicesPath(id string) string {
+func (ad *Client) servicesPath(id string) string {
 	return ad.Endpoint + "/v1/services/" + id
-}
-
-type AdapterResponses []AdapterResponse
-
-type AdapterResponse struct {
-	ID          string `json:"id"`
-	ActualState string `json:"actualState,omitempty"`
 }
