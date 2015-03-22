@@ -24,58 +24,9 @@ func (d *DeploymentBlueprint) MergedImages() []Image {
 	return mImgs
 }
 
-type DeploymentResponses []DeploymentResponseLite
-
-func NewDeploymentResponseLite(id int, nm string, tpl string, sids string) *DeploymentResponseLite {
-	drl := &DeploymentResponseLite{
-		ID:           id,
-		Name:         nm,
-		Redeployable: tpl != "",
-	}
-
-	json.Unmarshal([]byte(sids), &drl.ServiceIDs)
-	json.Unmarshal([]byte(tpl), &drl.Template)
-
-	return drl
-}
-
-type DeploymentResponseLite struct {
-	ID           int      `json:"id"`
-	Name         string   `json:"name"`
-	Redeployable bool     `json:"redeployable"`
-	ServiceIDs   []string `json:"service_ids"`
-	Template     Template `json:"-"`
-}
-
-type DeploymentResponseFull struct {
-	ID           int           `json:"id"`
-	Name         string        `json:"name"`
-	Redeployable bool          `json:"redeployable"`
-	Status       ServiceStatus `json:"status"`
-}
-
-type Environment struct {
-	Variable string `json:"variable,omitempty"`
-	Value    string `json:"value,omitempty"`
-}
-
-type Link struct {
-	Service string `json:"service,omitempty"`
-	Alias   string `json:"alias,omitempty"`
-}
-
-type Port struct {
-	HostPort      int `json:"hostPort,omitempty"`
-	ContainerPort int `json:"containerPort,omitempty"`
-}
-
-type DeploymentSettings struct {
-	Count int `json:"count,omitempty"`
-}
-
-type Volume struct {
-	ContainerPath string `json:"containerPath"`
-	HostPath      string `json:"hostPath"`
+type Template struct {
+	Name   string  `json:"name,omitempty"`
+	Images []Image `json:"images,omitempty"`
 }
 
 type Image struct {
@@ -119,10 +70,62 @@ func (img *Image) overrideEnv(o Image) {
 	img.Environment = envs
 }
 
-type Template struct {
-	Name   string  `json:"name,omitempty"`
-	Images []Image `json:"images,omitempty"`
-	// TODO: Description?
+type Environment struct {
+	Variable string `json:"variable,omitempty"`
+	Value    string `json:"value,omitempty"`
+}
+
+type Link struct {
+	Service string `json:"service,omitempty"`
+	Alias   string `json:"alias,omitempty"`
+}
+
+type Port struct {
+	HostPort      int `json:"hostPort,omitempty"`
+	ContainerPort int `json:"containerPort,omitempty"`
+}
+
+type DeploymentSettings struct {
+	Count int `json:"count,omitempty"`
+}
+
+type Volume struct {
+	ContainerPath string `json:"containerPath"`
+	HostPath      string `json:"hostPath"`
+}
+
+type DeploymentResponses []DeploymentResponseLite
+
+func NewDeploymentResponseLite(id int, nm string, tpl string, sids string) *DeploymentResponseLite {
+	drl := &DeploymentResponseLite{
+		ID:           id,
+		Name:         nm,
+		Redeployable: tpl != "",
+	}
+
+	json.Unmarshal([]byte(sids), &drl.ServiceIDs)
+	json.Unmarshal([]byte(tpl), &drl.Template)
+
+	return drl
+}
+
+type DeploymentResponseLite struct {
+	ID           int      `json:"id"`
+	Name         string   `json:"name"`
+	Redeployable bool     `json:"redeployable"`
+	ServiceIDs   []string `json:"service_ids"`
+	Template     Template `json:"-"`
+}
+
+type DeploymentResponseFull struct {
+	ID           int    `json:"id"`
+	Name         string `json:"name"`
+	Redeployable bool   `json:"redeployable"`
+	Status       Status `json:"status"`
+}
+
+type Status struct {
+	Services Services `json:"services"`
 }
 
 type Service struct {
@@ -131,10 +134,6 @@ type Service struct {
 }
 
 type Services []Service
-
-type ServiceStatus struct {
-	Services Services `json:"services"`
-}
 
 type Metadata struct {
 	Agent struct {

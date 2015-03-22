@@ -49,6 +49,7 @@ func (dm DeploymentManager) GetFullDeployment(qid int) (DeploymentResponseFull, 
 		return DeploymentResponseFull{}, err
 	}
 
+	//TODO: maybe use a constructor for all this.
 	srvs := make(Services, len(dep.ServiceIDs))
 	for i, sID := range dep.ServiceIDs {
 		srvc := dm.AdapterClient.GetService(sID)
@@ -62,7 +63,7 @@ func (dm DeploymentManager) GetFullDeployment(qid int) (DeploymentResponseFull, 
 		Name:         dep.Name,
 		ID:           dep.ID,
 		Redeployable: dep.Redeployable,
-		Status:       ServiceStatus{Services: srvs},
+		Status:       Status{Services: srvs},
 	}
 
 	return dr, nil
