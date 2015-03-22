@@ -23,7 +23,7 @@ func NewClient(ep string) Client {
 	return ad
 }
 
-func (ad *Client) CreateServices(buf *bytes.Buffer) []Service {
+func (ad Client) CreateServices(buf *bytes.Buffer) []Service {
 	resp, _ := ad.Client.Post(ad.servicesPath(""), "application/json", buf)
 
 	ars := &[]Service{}
@@ -33,7 +33,7 @@ func (ad *Client) CreateServices(buf *bytes.Buffer) []Service {
 	return *ars
 }
 
-func (ad *Client) GetService(sid string) Service {
+func (ad Client) GetService(sid string) Service {
 	resp, _ := ad.Client.Get(ad.servicesPath(sid))
 
 	if resp.StatusCode == http.StatusNotFound {
@@ -49,7 +49,7 @@ func (ad *Client) GetService(sid string) Service {
 	return *srvc
 }
 
-func (ad *Client) DeleteService(sid string) error {
+func (ad Client) DeleteService(sid string) error {
 	req, err := http.NewRequest("DELETE", ad.servicesPath(sid), nil)
 
 	if err != nil {
@@ -61,7 +61,7 @@ func (ad *Client) DeleteService(sid string) error {
 	return err
 }
 
-func (ad *Client) FetchMetadata() (interface{}, error) {
+func (ad Client) FetchMetadata() (interface{}, error) {
 	res, err := ad.Client.Get(ad.Endpoint + "/v1/metadata")
 
 	if err != nil {
@@ -75,6 +75,6 @@ func (ad *Client) FetchMetadata() (interface{}, error) {
 	return r, nil
 }
 
-func (ad *Client) servicesPath(id string) string {
+func (ad Client) servicesPath(id string) string {
 	return ad.Endpoint + "/v1/services/" + id
 }

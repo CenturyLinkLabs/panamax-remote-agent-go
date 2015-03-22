@@ -8,12 +8,26 @@ import (
 	"github.com/CenturyLinkLabs/panamax-remote-agent-go/repo"
 )
 
-type DeploymentManager struct {
-	Repo          repo.DeploymentRepo //TODO, this should probably be an interface
-	AdapterClient adapter.Client
+type DeploymentRepo interface {
+	FindByID(int) (repo.Deployment, error)
+	All() ([]repo.Deployment, error)
+	Save(*repo.Deployment) error
+	Remove(int) error
 }
 
-func MakeDeploymentManager(dRepo repo.DeploymentRepo, ad adapter.Client) DeploymentManager {
+type AdapterClient interface {
+	CreateServices(*bytes.Buffer) []adapter.Service
+	GetService(string) adapter.Service
+	DeleteService(string) error
+	FetchMetadata() (interface{}, error)
+}
+
+type DeploymentManager struct {
+	Repo          DeploymentRepo
+	AdapterClient AdapterClient
+}
+
+func MakeDeploymentManager(dRepo DeploymentRepo, ad AdapterClient) DeploymentManager {
 	return DeploymentManager{
 		Repo:          dRepo,
 		AdapterClient: ad,
