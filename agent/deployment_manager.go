@@ -13,11 +13,11 @@ type DeploymentManager struct {
 	AdapterClient adapter.Client
 }
 
-func NewDeploymentManager(dRepo repo.DeploymentRepo, ad adapter.Client) (DeploymentManager, error) {
+func MakeDeploymentManager(dRepo repo.DeploymentRepo, ad adapter.Client) DeploymentManager {
 	return DeploymentManager{
 		Repo:          dRepo,
 		AdapterClient: ad,
-	}, nil
+	}
 }
 
 func (dm DeploymentManager) ListDeployments() (DeploymentResponses, error) {

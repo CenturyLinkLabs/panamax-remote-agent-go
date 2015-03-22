@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	// "os"
 	"regexp"
 
@@ -13,14 +12,8 @@ import (
 
 func main() {
 	dRepo := repo.NewDeploymentRepo("db/agent.db")
-
 	ad := adapter.NewClient(adapterEndpoint())
-
-	dm, err := agent.NewDeploymentManager(dRepo, ad)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	dm := agent.MakeDeploymentManager(dRepo, ad)
 	s := api.NewServer(dm)
 	s.Start(":1234")
 }
