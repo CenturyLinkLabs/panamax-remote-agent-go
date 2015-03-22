@@ -94,10 +94,3 @@ func (dRepo DeploymentRepo) Remove(id int) error {
 	)
 	return err
 }
-
-type Deployment struct {
-	ID         int
-	Name       string
-	ServiceIDs string
-	Template   string
-}
