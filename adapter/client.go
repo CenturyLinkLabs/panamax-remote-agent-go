@@ -6,7 +6,6 @@ import (
 	"net/http"
 )
 
-//TODO: we could break clients into a service client, and metadata client.
 type Client struct {
 	Endpoint string
 	Client   *http.Client

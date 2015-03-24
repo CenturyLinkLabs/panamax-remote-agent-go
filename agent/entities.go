@@ -48,8 +48,6 @@ func (img *Image) OverrideWith(o Image) {
 }
 
 func (img *Image) overrideDeployment(o Image) {
-	//TODO this could probably use reflection to iterate over the keys
-	// but for now there's only one
 	if (o.Deployment != DeploymentSettings{}) {
 		img.Deployment = o.Deployment
 	}

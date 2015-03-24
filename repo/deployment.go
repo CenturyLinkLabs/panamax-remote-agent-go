@@ -20,7 +20,6 @@ func NewDeploymentRepo(dbPath string) DeploymentRepo {
 	if err != nil {
 		fmt.Println(err)
 	}
-	//TODO: do I ever need to call close?
 
 	return DeploymentRepo{
 		DB: db,
@@ -35,7 +34,6 @@ func (dRepo DeploymentRepo) FindByID(qid int) (Deployment, error) {
 		qid,
 	).Scan(&dep.ID, &dep.Name, &dep.Template, &dep.ServiceIDs)
 	if err != nil {
-		// TODO: we could handle ErrNoRows differently, but for now that's just an error to me
 		return Deployment{}, err
 	}
 
