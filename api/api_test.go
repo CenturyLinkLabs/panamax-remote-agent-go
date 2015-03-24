@@ -146,14 +146,9 @@ func TestListDeploymentsWhenNoDeploymentsExist(t *testing.T) {
 }
 
 func TestCreateDeployment(t *testing.T) {
-	var resImgs []agent.Image
+	var resBody []byte
 	setup(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		jd := json.NewDecoder(r.Body)
-		imgs := &[]agent.Image{}
-		if err := jd.Decode(imgs); err != nil {
-			panic(err)
-		}
-		resImgs = *imgs
+		resBody, _ = ioutil.ReadAll(r.Body)
 
 		drs := []adapter.Service{
 			{ID: "wp-pod"},
@@ -244,42 +239,35 @@ func TestCreateDeployment(t *testing.T) {
 		panic(err)
 	}
 
-	expImgs := []agent.Image{
+	b := []byte(`[
 		{
-			Name:    "wp",
-			Source:  "centurylink/wordpress:3.9.1",
-			Command: "./run.sh",
-			Links: []agent.Link{
-				{Service: "mysql", Alias: "DB_1"},
-			},
-			Ports: []agent.Port{
-				agent.Port{HostPort: 8000, ContainerPort: 80},
-			},
-			Environment: []agent.Environment{
-				{Variable: "DB_PASSWORD", Value: "pass@word02"},
-				{Variable: "DB_NAME", Value: "wordpress"},
-			},
-			Deployment: agent.DeploymentSettings{Count: 1},
+			"command":"./run.sh",
+			"deployment":{"count":1},
+			"environment":[{"variable":"DB_PASSWORD","value":"pass@word02"},{"variable":"DB_NAME","value":"wordpress"}],
+			"links":[{"service":"mysql","alias":"DB_1"}],
+			"name":"wp",
+			"ports":[{"hostPort":8000,"containerPort":80}],
+			"source":"centurylink/wordpress:3.9.1"
 		},
 		{
-			Name:    "mysql",
-			Source:  "centurylink/mysql:5.5",
-			Command: "./run.sh",
-			Ports: []agent.Port{
-				{HostPort: 3306, ContainerPort: 3306},
-			},
-			Environment: []agent.Environment{
-				{Variable: "MYSQL_ROOT_PASSWORD", Value: "pass@word02"},
-			},
-			Expose:      []int{1234, 5678},
-			Volumes:     []agent.Volume{{HostPath: "foo/bar", ContainerPath: "/var/bar"}},
-			VolumesFrom: []string{"wp"},
+			"command":"./run.sh",
+			"environment":[{"variable":"MYSQL_ROOT_PASSWORD","value":"pass@word02"}],
+			"expose":[1234,5678],
+			"name":"mysql",
+			"ports":[{"hostPort":3306,"containerPort":3306}],
+			"source":"centurylink/mysql:5.5",
+			"volumes":[{"containerPath":"/var/bar","hostPath":"foo/bar"}],
+			"volumesFrom":["wp"]
 		},
 		{
-			Name:   "honeybadger",
-			Source: "honey/badger",
-		},
-	}
+			"name":"honeybadger",
+			"source":"honey/badger"
+		}
+	]`)
+
+	bb := bytes.Buffer{}
+	json.Compact(&bb, b)
+	expBody, _ := ioutil.ReadAll(&bb)
 
 	assert.Equal(t, 201, res.StatusCode)
 	assert.Equal(t, "application/json; charset=utf-8", res.Header["Content-Type"][0])
@@ -287,7 +275,7 @@ func TestCreateDeployment(t *testing.T) {
 	assert.Equal(t, "fooya", dr.Name)
 	assert.Equal(t, true, dr.Redeployable)
 	assert.Equal(t, []string{"wp-pod", "mysql-pod", "honey-pod"}, dr.ServiceIDs)
-	assert.Equal(t, expImgs, resImgs)
+	assert.Equal(t, string(expBody), strings.TrimSpace(string(resBody)))
 }
 
 func TestListDeploymentsWhenOneExists(t *testing.T) {

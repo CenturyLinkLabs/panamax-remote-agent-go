@@ -1,6 +1,9 @@
 package agent
 
 import (
+	"bytes"
+	"encoding/json"
+	"io/ioutil"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -64,7 +67,7 @@ func TestMergedImagesOverridesENV(t *testing.T) {
 	assert.Equal(t, e, mImgs[0].Environment)
 }
 
-func TestMergedImagesExtraENVs(t *testing.T) {
+func TestMergedImagesAddsExtraENVs(t *testing.T) {
 	depB := DeploymentBlueprint{
 		Template: Template{
 			Images: []Image{
@@ -97,4 +100,48 @@ func TestMergedImagesExtraENVs(t *testing.T) {
 	}
 
 	assert.Equal(t, e, mImgs[0].Environment)
+}
+
+func TestEmptyImageProducesEmptyJSON(t *testing.T) {
+	img := Image{}
+	j, err := json.Marshal(img)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "{}", string(j))
+}
+
+func TestFullImageProducesProperJSON(t *testing.T) {
+	img := Image{
+		Name:        "foo",
+		Source:      "bar/foo",
+		Command:     "./run.sh",
+		Deployment:  DeploymentSettings{Count: 2},
+		Links:       []Link{{Service: "bla", Alias: "b"}},
+		Environment: []Environment{{Variable: "FOO", Value: "bar"}},
+		Ports:       []Port{{HostPort: 22, ContainerPort: 23}},
+		Expose:      []int{33, 44},
+		Volumes:     []Volume{{ContainerPath: "/var", HostPath: "/usr"}},
+		VolumesFrom: []string{"/viz"},
+	}
+	j, err := json.Marshal(img)
+
+	buf := []byte(`{
+		"command":"./run.sh",
+		"deployment":{"count":2},
+		"environment":[{"variable":"FOO","value":"bar"}],
+		"expose":[33,44],
+		"links":[{"service":"bla","alias":"b"}],
+		"name":"foo",
+		"ports":[{"hostPort":22,"containerPort":23}],
+		"source":"bar/foo",
+		"volumes":[{"containerPath":"/var","hostPath":"/usr"}],
+		"volumesFrom":["/viz"]
+	}`)
+
+	bb := bytes.Buffer{}
+	json.Compact(&bb, buf)
+	e, _ := ioutil.ReadAll(&bb)
+
+	assert.NoError(t, err)
+	assert.Equal(t, string(e), string(j))
 }

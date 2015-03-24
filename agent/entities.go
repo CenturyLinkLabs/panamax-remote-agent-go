@@ -30,16 +30,53 @@ type Template struct {
 }
 
 type Image struct {
-	Name        string             `json:"name,omitempty"`
-	Source      string             `json:"source,omitempty"`
-	Command     string             `json:"command,omitempty"`
-	Deployment  DeploymentSettings `json:"deployment,omitempty"`
-	Links       []Link             `json:"links,omitempty"`
-	Environment []Environment      `json:"environment,omitempty"`
-	Ports       []Port             `json:"port,omitemptys`
+	Name        string             `json:"name"`
+	Source      string             `json:"source"`
+	Command     string             `json:"command"`
+	Deployment  DeploymentSettings `json:"deployment"`
+	Links       []Link             `json:"links"`
+	Environment []Environment      `json:"environment"`
+	Ports       []Port             `json:"port"`
 	Expose      []int              `json:"expose"`
 	Volumes     []Volume           `json:"volumes"`
 	VolumesFrom []string           `json:"volumesFrom"`
+}
+
+func (img Image) MarshalJSON() ([]byte, error) {
+	i := map[string]interface{}{}
+
+	if img.Name != "" {
+		i["name"] = img.Name
+	}
+	if img.Source != "" {
+		i["source"] = img.Source
+	}
+	if img.Command != "" {
+		i["command"] = img.Command
+	}
+	if (img.Deployment != DeploymentSettings{}) {
+		i["deployment"] = img.Deployment
+	}
+	if len(img.Links) > 0 {
+		i["links"] = img.Links
+	}
+	if len(img.Environment) > 0 {
+		i["environment"] = img.Environment
+	}
+	if len(img.Ports) > 0 {
+		i["ports"] = img.Ports
+	}
+	if len(img.Expose) > 0 {
+		i["expose"] = img.Expose
+	}
+	if len(img.Volumes) > 0 {
+		i["volumes"] = img.Volumes
+	}
+	if len(img.VolumesFrom) > 0 {
+		i["volumesFrom"] = img.VolumesFrom
+	}
+
+	return json.Marshal(i)
 }
 
 func (img *Image) overrideWith(o Image) {
@@ -113,7 +150,7 @@ type DeploymentResponseLite struct {
 	Name         string   `json:"name"`
 	Redeployable bool     `json:"redeployable"`
 	ServiceIDs   []string `json:"service_ids"`
-	Template     Template `json:"-"`
+	Template     Template `json:"-"` //TODO don't think we need this anymore
 }
 
 type DeploymentResponseFull struct {
