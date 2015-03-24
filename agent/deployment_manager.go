@@ -64,10 +64,10 @@ func (dm DeploymentManager) GetFullDeployment(qid int) (DeploymentResponseFull, 
 	}
 
 	//TODO: maybe use a constructor for all this.
-	srvs := make(Services, len(dep.ServiceIDs))
+	as := make(Services, len(dep.ServiceIDs))
 	for i, sID := range dep.ServiceIDs {
 		srvc := dm.AdapterClient.GetService(sID)
-		srvs[i] = Service{
+		as[i] = Service{
 			ID:          srvc.ID,
 			ActualState: srvc.ActualState,
 		}
@@ -77,7 +77,7 @@ func (dm DeploymentManager) GetFullDeployment(qid int) (DeploymentResponseFull, 
 		Name:         dep.Name,
 		ID:           dep.ID,
 		Redeployable: dep.Redeployable,
-		Status:       Status{Services: srvs},
+		Status:       Status{Services: as},
 	}
 
 	return dr, nil
@@ -113,44 +113,26 @@ func (dm DeploymentManager) DeleteDeployment(qID int) error {
 		dm.AdapterClient.DeleteService(sID)
 	}
 
-	if err := dm.Repo.Remove(qID); err != nil {
-		return err
-	}
+	dm.Repo.Remove(qID)
 
 	return err
 }
 
 func (dm DeploymentManager) CreateDeployment(depB DeploymentBlueprint) (DeploymentResponseLite, error) {
 
-	imgs := depB.MergedImages()
+	mImgs := depB.MergedImages()
 
-	buf := new(bytes.Buffer)
-	if err := json.NewEncoder(buf).Encode(imgs); err != nil {
-		panic(err)
-	}
-
-	ars := dm.AdapterClient.CreateServices(buf)
-
-	sIDs := make([]string, len(ars))
-
-	for i, ar := range ars {
-		sIDs[i] = ar.ID
-	}
-
-	// decode the template so we can persist it
-	b, err := json.Marshal(depB.Template)
-	if err != nil {
+	buf := &bytes.Buffer{}
+	if err := json.NewEncoder(buf).Encode(mImgs); err != nil {
 		return DeploymentResponseLite{}, err
 	}
-	template := string(b)
 
-	sb, err := json.Marshal(sIDs)
-	sj := string(sb)
+	as := dm.AdapterClient.CreateServices(buf)
 
-	dep := repo.Deployment{
-		Name:       depB.Template.Name,
-		Template:   template,
-		ServiceIDs: sj,
+	tn := depB.Template.Name
+	dep, err := makeRepoDeployment(tn, mImgs, as)
+	if err != nil {
+		return DeploymentResponseLite{}, err
 	}
 
 	if err := dm.Repo.Save(&dep); err != nil {
@@ -201,4 +183,41 @@ func (dm DeploymentManager) FetchMetadata() (Metadata, error) {
 	}
 
 	return md, nil
+}
+
+func makeRepoDeployment(tn string, mImgs []Image, as []adapter.Service) (repo.Deployment, error) {
+	ts, err := stringifyTemplate(tn, mImgs)
+	ss, err := stringifyServiceIDs(as)
+
+	if err != nil {
+		return repo.Deployment{}, err
+	}
+
+	return repo.Deployment{
+		Name:       tn,
+		Template:   ts,
+		ServiceIDs: ss,
+	}, nil
+}
+
+func stringifyTemplate(tn string, imgs []Image) (string, error) {
+	mt := Template{
+		Name:   tn,
+		Images: imgs,
+	}
+	b, err := json.Marshal(mt)
+
+	return string(b), err
+}
+
+func stringifyServiceIDs(as []adapter.Service) (string, error) {
+	sIDs := make([]string, len(as))
+
+	for i, ar := range as {
+		sIDs[i] = ar.ID
+	}
+
+	sb, err := json.Marshal(sIDs)
+
+	return string(sb), err
 }
