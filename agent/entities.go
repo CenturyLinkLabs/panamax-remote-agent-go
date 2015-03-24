@@ -15,7 +15,7 @@ func (d *DeploymentBlueprint) MergedImages() []Image {
 	for i, tImg := range d.Template.Images {
 		for _, oImg := range d.Override.Images {
 			if oImg.Name == tImg.Name {
-				tImg.OverrideWith(oImg)
+				tImg.overrideWith(oImg)
 			}
 		}
 
@@ -42,7 +42,7 @@ type Image struct {
 	VolumesFrom []string           `json:"volumesFrom"`
 }
 
-func (img *Image) OverrideWith(o Image) {
+func (img *Image) overrideWith(o Image) {
 	img.overrideEnv(o)
 	img.overrideDeployment(o)
 }
