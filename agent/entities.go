@@ -30,16 +30,16 @@ type Template struct {
 }
 
 type Image struct {
-	Name        string             `json:"name"`
-	Source      string             `json:"source"`
-	Command     string             `json:"command"`
-	Deployment  DeploymentSettings `json:"deployment"`
-	Links       []Link             `json:"links"`
-	Environment []Environment      `json:"environment"`
-	Ports       []Port             `json:"port"`
-	Expose      []int              `json:"expose"`
-	Volumes     []Volume           `json:"volumes"`
-	VolumesFrom []string           `json:"volumesFrom"`
+	Name        string
+	Source      string
+	Command     string
+	Deployment  DeploymentSettings
+	Links       []Link
+	Environment []Environment
+	Ports       []Port
+	Expose      []int
+	Volumes     []Volume
+	VolumesFrom []string
 }
 
 func (img Image) MarshalJSON() ([]byte, error) {
