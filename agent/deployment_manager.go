@@ -8,6 +8,7 @@ import (
 	"github.com/CenturyLinkLabs/panamax-remote-agent-go/repo"
 )
 
+// TODO: move this into repo
 type DeploymentRepo interface {
 	FindByID(int) (repo.Deployment, error)
 	All() ([]repo.Deployment, error)
@@ -15,19 +16,12 @@ type DeploymentRepo interface {
 	Remove(int) error
 }
 
-type AdapterClient interface {
-	CreateServices(*bytes.Buffer) []adapter.Service
-	GetService(string) adapter.Service
-	DeleteService(string) error
-	FetchMetadata() (interface{}, error)
-}
-
 type DeploymentManager struct {
 	Repo          DeploymentRepo
-	AdapterClient AdapterClient
+	AdapterClient adapter.AdapterClient
 }
 
-func MakeDeploymentManager(dRepo DeploymentRepo, ad AdapterClient) DeploymentManager {
+func MakeDeploymentManager(dRepo DeploymentRepo, ad adapter.AdapterClient) DeploymentManager {
 	return DeploymentManager{
 		Repo:          dRepo,
 		AdapterClient: ad,
@@ -43,7 +37,7 @@ func (dm DeploymentManager) ListDeployments() (DeploymentResponses, error) {
 	drs := make(DeploymentResponses, len(deps))
 
 	for i, dep := range deps {
-		dr := NewDeploymentResponseLite(
+		dr := deploymentResponseLiteFromRawValues(
 			dep.ID,
 			dep.Name,
 			dep.Template,
@@ -89,7 +83,7 @@ func (dm DeploymentManager) GetDeployment(qid int) (DeploymentResponseLite, erro
 		return DeploymentResponseLite{}, err
 	}
 
-	drl := NewDeploymentResponseLite(
+	drl := deploymentResponseLiteFromRawValues(
 		dep.ID,
 		dep.Name,
 		dep.Template,
@@ -139,7 +133,7 @@ func (dm DeploymentManager) CreateDeployment(depB DeploymentBlueprint) (Deployme
 		return DeploymentResponseLite{}, err
 	}
 
-	drl := NewDeploymentResponseLite(
+	drl := deploymentResponseLiteFromRawValues(
 		dep.ID,
 		dep.Name,
 		dep.Template,
@@ -153,7 +147,7 @@ func (dm DeploymentManager) ReDeploy(ID int) (DeploymentResponseLite, error) {
 
 	dep, err := dm.Repo.FindByID(ID)
 
-	dr := NewDeploymentResponseLite(
+	dr := deploymentResponseLiteFromRawValues(
 		dep.ID,
 		dep.Name,
 		dep.Template,
@@ -220,4 +214,17 @@ func stringifyServiceIDs(as []adapter.Service) (string, error) {
 	sb, err := json.Marshal(sIDs)
 
 	return string(sb), err
+}
+
+func deploymentResponseLiteFromRawValues(id int, nm string, tpl string, sids string) *DeploymentResponseLite {
+	drl := &DeploymentResponseLite{
+		ID:           id,
+		Name:         nm,
+		Redeployable: tpl != "",
+	}
+
+	json.Unmarshal([]byte(sids), &drl.ServiceIDs)
+	json.Unmarshal([]byte(tpl), &drl.Template)
+
+	return drl
 }

@@ -31,7 +31,7 @@ func init() {
 
 func setup(hdlr http.Handler) {
 	adapterServer = httptest.NewServer(hdlr)
-	ad := adapter.NewClient(adapterServer.URL)
+	ad := adapter.MakeClient(adapterServer.URL)
 	dm := agent.MakeDeploymentManager(dRepo, ad)
 	router = NewServer(dm).newRouter()
 	server = httptest.NewServer(router)

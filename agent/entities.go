@@ -132,19 +132,6 @@ type Volume struct {
 
 type DeploymentResponses []DeploymentResponseLite
 
-func NewDeploymentResponseLite(id int, nm string, tpl string, sids string) *DeploymentResponseLite {
-	drl := &DeploymentResponseLite{
-		ID:           id,
-		Name:         nm,
-		Redeployable: tpl != "",
-	}
-
-	json.Unmarshal([]byte(sids), &drl.ServiceIDs)
-	json.Unmarshal([]byte(tpl), &drl.Template)
-
-	return drl
-}
-
 type DeploymentResponseLite struct {
 	ID           int      `json:"id"`
 	Name         string   `json:"name"`

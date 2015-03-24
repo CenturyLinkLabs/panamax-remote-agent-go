@@ -12,7 +12,7 @@ import (
 
 func main() {
 	dRepo := repo.NewDeploymentRepo("db/agent.db")
-	ad := adapter.NewClient(adapterEndpoint())
+	ad := adapter.MakeClient(adapterEndpoint())
 	dm := agent.MakeDeploymentManager(dRepo, ad)
 	s := api.NewServer(dm)
 	s.Start(":1234")
