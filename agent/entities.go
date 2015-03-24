@@ -54,16 +54,17 @@ func (img *Image) overrideDeployment(o Image) {
 }
 
 func (img *Image) overrideEnv(o Image) {
-	//TODO add the extra override envs that didn't exist in base
 	var envs []Environment
 
 	for _, env := range img.Environment {
-		for _, oEnv := range o.Environment {
+		for i, oEnv := range o.Environment {
 			if env.Variable == oEnv.Variable {
 				env = oEnv
+				o.Environment = append(o.Environment[:i], o.Environment[i+1:]...)
 			}
 		}
 		envs = append(envs, env)
+		envs = append(envs, o.Environment...)
 	}
 	img.Environment = envs
 }
