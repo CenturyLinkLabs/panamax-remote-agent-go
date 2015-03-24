@@ -44,7 +44,7 @@ func (dm DeploymentManager) ListDeployments() (DeploymentResponses, error) {
 			dep.ServiceIDs,
 		)
 
-		drs[i] = *dr
+		drs[i] = dr
 	}
 
 	return drs, nil
@@ -90,7 +90,7 @@ func (dm DeploymentManager) GetDeployment(qid int) (DeploymentResponseLite, erro
 		dep.ServiceIDs,
 	)
 
-	return *drl, nil
+	return drl, nil
 }
 
 func (dm DeploymentManager) DeleteDeployment(qID int) error {
@@ -140,7 +140,7 @@ func (dm DeploymentManager) CreateDeployment(depB DeploymentBlueprint) (Deployme
 		dep.ServiceIDs,
 	)
 
-	return *drl, nil
+	return drl, nil
 }
 
 func (dm DeploymentManager) ReDeploy(ID int) (DeploymentResponseLite, error) {
@@ -216,15 +216,14 @@ func stringifyServiceIDs(as []adapter.Service) (string, error) {
 	return string(sb), err
 }
 
-func deploymentResponseLiteFromRawValues(id int, nm string, tpl string, sids string) *DeploymentResponseLite {
+func deploymentResponseLiteFromRawValues(id int, nm string, tpl string, sids string) DeploymentResponseLite {
 	drl := &DeploymentResponseLite{
 		ID:           id,
 		Name:         nm,
 		Redeployable: tpl != "",
 	}
-
 	json.Unmarshal([]byte(sids), &drl.ServiceIDs)
 	json.Unmarshal([]byte(tpl), &drl.Template)
 
-	return drl
+	return *drl
 }
