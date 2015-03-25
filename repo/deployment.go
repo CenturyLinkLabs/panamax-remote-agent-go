@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	// The sql.Open command references the driver name
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -41,7 +42,7 @@ func (p deploymentPersister) FindByID(qid int) (Deployment, error) {
 }
 
 func (p deploymentPersister) All() ([]Deployment, error) {
-	drs := make([]Deployment, 0)
+	var ds []Deployment
 
 	rows, err := p.db.Query("SELECT id, name, template, service_ids FROM deployments")
 	if err != nil {
@@ -58,14 +59,14 @@ func (p deploymentPersister) All() ([]Deployment, error) {
 			return []Deployment{}, err
 		}
 
-		drs = append(drs, *dep)
+		ds = append(ds, *dep)
 	}
 
 	if err := rows.Err(); err != nil {
 		return []Deployment{}, err
 	}
 
-	return drs, err
+	return ds, err
 }
 
 func (p deploymentPersister) Save(dep *Deployment) error {
