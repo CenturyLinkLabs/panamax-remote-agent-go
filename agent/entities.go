@@ -10,7 +10,7 @@ type DeploymentBlueprint struct {
 }
 
 func (d *DeploymentBlueprint) MergedImages() []Image {
-	mImgs := make([]Image, len(d.Template.Images))
+	mImgs := make([]Image, len(d.Template.Images), len(d.Template.Images))
 
 	for i, tImg := range d.Template.Images {
 		for _, oImg := range d.Override.Images {

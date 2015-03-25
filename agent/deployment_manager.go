@@ -26,7 +26,7 @@ func (dm DeploymentManager) ListDeployments() (DeploymentResponses, error) {
 		return DeploymentResponses{}, err
 	}
 
-	drs := make(DeploymentResponses, len(deps))
+	drs := make(DeploymentResponses, len(deps), len(deps))
 
 	for i, dep := range deps {
 		dr := deploymentResponseLiteFromRawValues(
@@ -49,8 +49,7 @@ func (dm DeploymentManager) GetFullDeployment(qid int) (DeploymentResponseFull, 
 		return DeploymentResponseFull{}, err
 	}
 
-	//TODO: maybe use a constructor for all this.
-	as := make(Services, len(dep.ServiceIDs))
+	as := make(Services, len(dep.ServiceIDs), len(dep.ServiceIDs))
 	for i, sID := range dep.ServiceIDs {
 		srvc := dm.Client.GetService(sID)
 		as[i] = Service{
@@ -193,7 +192,7 @@ func stringifyTemplate(tn string, imgs []Image) (string, error) {
 }
 
 func stringifyServiceIDs(as []adapter.Service) (string, error) {
-	sIDs := make([]string, len(as))
+	sIDs := make([]string, len(as), len(as))
 
 	for i, ar := range as {
 		sIDs[i] = ar.ID
