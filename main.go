@@ -2,6 +2,7 @@ package main
 
 import (
 	// "os"
+	"log"
 	"regexp"
 
 	"github.com/CenturyLinkLabs/panamax-remote-agent-go/adapter"
@@ -11,7 +12,10 @@ import (
 )
 
 func main() {
-	p := repo.MakePersister("db/agent.db")
+	p, err := repo.MakePersister("db/agent.db")
+	if err != nil {
+		log.Fatal(err)
+	}
 	c := adapter.MakeClient(adapterEndpoint())
 	dm := agent.MakeDeploymentManager(p, c)
 	s := api.NewServer(dm)

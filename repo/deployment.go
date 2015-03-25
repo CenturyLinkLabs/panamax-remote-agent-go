@@ -2,7 +2,6 @@ package repo
 
 import (
 	"database/sql"
-	"fmt"
 
 	// The sql.Open command references the driver name
 	_ "github.com/mattn/go-sqlite3"
@@ -12,15 +11,15 @@ const (
 	dbDriver = "sqlite"
 )
 
-func MakePersister(dbPath string) Persister {
+func MakePersister(dbPath string) (Persister, error) {
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
-		fmt.Println(err)
+		return deploymentPersister{}, err
 	}
 
 	return deploymentPersister{
 		db: db,
-	}
+	}, nil
 }
 
 type deploymentPersister struct {

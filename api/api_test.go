@@ -26,7 +26,7 @@ var (
 )
 
 func init() {
-	rp = repo.MakePersister("../db/agent_test.db")
+	rp, _ = repo.MakePersister("../db/agent_test.db")
 }
 
 func setup(hdlr http.Handler) {
@@ -64,7 +64,6 @@ func doGET(url string) (*http.Response, error) {
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -72,7 +71,6 @@ func doGET(url string) (*http.Response, error) {
 
 	res, errr := c.Do(req)
 	if errr != nil {
-		fmt.Println(errr)
 		return nil, errr
 	}
 
@@ -84,7 +82,6 @@ func doPOST(url string, r io.Reader) (*http.Response, error) {
 
 	req, err := http.NewRequest("POST", url, r)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -93,7 +90,6 @@ func doPOST(url string, r io.Reader) (*http.Response, error) {
 
 	res, errr := c.Do(req)
 	if errr != nil {
-		fmt.Println(errr)
 		return nil, errr
 	}
 
@@ -105,7 +101,6 @@ func doDELETE(url string) (*http.Response, error) {
 
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -114,7 +109,6 @@ func doDELETE(url string) (*http.Response, error) {
 
 	res, errr := c.Do(req)
 	if errr != nil {
-		fmt.Println(errr)
 		return nil, errr
 	}
 
@@ -229,7 +223,7 @@ func TestCreateDeployment(t *testing.T) {
 
 	res, err := doPOST(baseURI+"/deployments", buf)
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 	defer res.Body.Close()
 
