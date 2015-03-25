@@ -130,8 +130,6 @@ type Volume struct {
 	HostPath      string `json:"hostPath"`
 }
 
-type DeploymentResponses []DeploymentResponseLite
-
 type DeploymentResponseLite struct {
 	ID           int      `json:"id"`
 	Name         string   `json:"name"`
@@ -147,15 +145,13 @@ type DeploymentResponseFull struct {
 }
 
 type Status struct {
-	Services Services `json:"services"`
+	Services []Service `json:"services"`
 }
 
 type Service struct {
 	ID          string `json:"id"`
 	ActualState string `json:"actualState"`
 }
-
-type Services []Service
 
 type Metadata struct {
 	Agent struct {

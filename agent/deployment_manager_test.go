@@ -94,7 +94,7 @@ func TestSuccessfullListDeployments(t *testing.T) {
 
 	drs, err := dm.ListDeployments()
 
-	ex := DeploymentResponses{
+	ex := []DeploymentResponseLite{
 		{
 			ID:           1,
 			Name:         "booyah",
@@ -118,7 +118,7 @@ func TestErroredListDeployments(t *testing.T) {
 
 	drs, err := dm.ListDeployments()
 
-	ex := DeploymentResponses{}
+	ex := []DeploymentResponseLite{}
 
 	assert.Equal(t, ex, drs)
 	assert.EqualError(t, err, "something failed")
@@ -219,7 +219,7 @@ func TestSucessfulGetFullDeployment(t *testing.T) {
 		ID:   7,
 		Name: "Full booyah",
 		Status: Status{
-			Services: Services{
+			Services: []Service{
 				Service{
 					ID:          "wp-pod",
 					ActualState: "running",

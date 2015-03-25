@@ -20,13 +20,13 @@ func MakeDeploymentManager(p repo.Persister, c adapter.Client) DeploymentManager
 	}
 }
 
-func (dm DeploymentManager) ListDeployments() (DeploymentResponses, error) {
+func (dm DeploymentManager) ListDeployments() ([]DeploymentResponseLite, error) {
 	deps, err := dm.Repo.All()
 	if err != nil {
-		return DeploymentResponses{}, err
+		return []DeploymentResponseLite{}, err
 	}
 
-	drs := make(DeploymentResponses, len(deps), len(deps))
+	drs := make([]DeploymentResponseLite, len(deps), len(deps))
 
 	for i, dep := range deps {
 		dr := deploymentResponseLiteFromRawValues(
@@ -49,7 +49,7 @@ func (dm DeploymentManager) GetFullDeployment(qid int) (DeploymentResponseFull, 
 		return DeploymentResponseFull{}, err
 	}
 
-	as := make(Services, len(dep.ServiceIDs), len(dep.ServiceIDs))
+	as := make([]Service, len(dep.ServiceIDs), len(dep.ServiceIDs))
 	for i, sID := range dep.ServiceIDs {
 		srvc := dm.Client.GetService(sID)
 		as[i] = Service{

@@ -42,7 +42,7 @@ func teardown() {
 	server.Close()
 }
 
-func getAllDeployments() agent.DeploymentResponses {
+func getAllDeployments() []agent.DeploymentResponseLite {
 
 	res, err := doGET(baseURI + "/deployments")
 	if err != nil {
@@ -50,7 +50,7 @@ func getAllDeployments() agent.DeploymentResponses {
 	}
 	defer res.Body.Close()
 
-	drs := make(agent.DeploymentResponses, 0)
+	drs := make([]agent.DeploymentResponseLite, 0)
 	jd := json.NewDecoder(res.Body)
 	if err := jd.Decode(&drs); err != nil {
 		panic(err)
@@ -279,7 +279,7 @@ func TestListDeploymentsWhenOneExists(t *testing.T) {
 	res, _ := doGET(baseURI + "/deployments")
 	defer res.Body.Close()
 
-	drs := make(agent.DeploymentResponses, 0)
+	drs := make([]agent.DeploymentResponseLite, 0)
 	jd := json.NewDecoder(res.Body)
 	if err := jd.Decode(&drs); err != nil {
 		panic(err)
