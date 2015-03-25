@@ -64,8 +64,7 @@ func (sc servicesClient) FetchMetadata() (interface{}, error) {
 	res, err := sc.netClient.Get(sc.endpoint + "/v1/metadata")
 
 	if err != nil {
-		//TODO
-		// return map[string]string, err
+		return nil, err
 	}
 
 	var r interface{}
