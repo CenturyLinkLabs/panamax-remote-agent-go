@@ -98,7 +98,6 @@ func TestSuccessfullListDeployments(t *testing.T) {
 		{
 			ID:           1,
 			Name:         "booyah",
-			Template:     Template{Name: "boom"},
 			Redeployable: true,
 			ServiceIDs:   []string{"wp-pod", "db-pod"},
 		},
@@ -145,7 +144,6 @@ func TestSuccessfulGetDeployment(t *testing.T) {
 	ex := DeploymentResponseLite{
 		ID:           7,
 		Name:         "booyah",
-		Template:     Template{Name: "boom"},
 		Redeployable: true,
 		ServiceIDs:   []string{"wp-pod", "db-pod"},
 	}

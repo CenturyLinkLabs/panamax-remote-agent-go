@@ -139,18 +139,14 @@ func (dm DeploymentManager) ReDeploy(ID int) (DeploymentResponseLite, error) {
 
 	dep, err := dm.Repo.FindByID(ID)
 
-	dr := deploymentResponseLiteFromRawValues(
-		dep.ID,
-		dep.Name,
-		dep.Template,
-		dep.ServiceIDs,
-	)
+	var tpl Template
+	json.Unmarshal([]byte(dep.Template), &tpl)
 
 	if err := dm.DeleteDeployment(ID); err != nil {
 		return DeploymentResponseLite{}, err
 	}
 
-	drl, err := dm.CreateDeployment(DeploymentBlueprint{Template: dr.Template})
+	drl, err := dm.CreateDeployment(DeploymentBlueprint{Template: tpl})
 	if err != nil {
 		return DeploymentResponseLite{}, err
 	}
@@ -215,7 +211,6 @@ func deploymentResponseLiteFromRawValues(id int, nm string, tpl string, sids str
 		Redeployable: tpl != "",
 	}
 	json.Unmarshal([]byte(sids), &drl.ServiceIDs)
-	json.Unmarshal([]byte(tpl), &drl.Template)
 
 	return *drl
 }
