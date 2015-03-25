@@ -13,9 +13,9 @@ type DeploymentManager struct {
 	AdapterClient adapter.AdapterClient
 }
 
-func MakeDeploymentManager(dRepo repo.Persister, ad adapter.AdapterClient) DeploymentManager {
+func MakeDeploymentManager(p repo.Persister, ad adapter.AdapterClient) DeploymentManager {
 	return DeploymentManager{
-		Repo:          dRepo,
+		Repo:          p,
 		AdapterClient: ad,
 	}
 }

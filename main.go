@@ -11,9 +11,9 @@ import (
 )
 
 func main() {
-	dRepo := repo.NewPersister("db/agent.db")
+	p := repo.MakePersister("db/agent.db")
 	ad := adapter.MakeClient(adapterEndpoint())
-	dm := agent.MakeDeploymentManager(dRepo, ad)
+	dm := agent.MakeDeploymentManager(p, ad)
 	s := api.NewServer(dm)
 	s.Start(":1234")
 }

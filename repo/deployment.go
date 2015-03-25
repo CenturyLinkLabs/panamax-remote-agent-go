@@ -11,25 +11,25 @@ const (
 	dbDriver = "sqlite"
 )
 
-type DeploymentRepo struct {
-	DB *sql.DB
-}
-
-func NewPersister(dbPath string) Persister {
+func MakePersister(dbPath string) Persister {
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	return DeploymentRepo{
-		DB: db,
+	return deploymentPersister{
+		db: db,
 	}
 }
 
-func (dRepo DeploymentRepo) FindByID(qid int) (Deployment, error) {
+type deploymentPersister struct {
+	db *sql.DB
+}
+
+func (p deploymentPersister) FindByID(qid int) (Deployment, error) {
 	dep := &Deployment{}
 
-	err := dRepo.DB.QueryRow(
+	err := p.db.QueryRow(
 		"SELECT id, name, template, service_ids FROM deployments WHERE id = ?",
 		qid,
 	).Scan(&dep.ID, &dep.Name, &dep.Template, &dep.ServiceIDs)
@@ -40,10 +40,10 @@ func (dRepo DeploymentRepo) FindByID(qid int) (Deployment, error) {
 	return *dep, nil
 }
 
-func (dRepo DeploymentRepo) All() ([]Deployment, error) {
+func (p deploymentPersister) All() ([]Deployment, error) {
 	drs := make([]Deployment, 0)
 
-	rows, err := dRepo.DB.Query("SELECT id, name, template, service_ids FROM deployments")
+	rows, err := p.db.Query("SELECT id, name, template, service_ids FROM deployments")
 	if err != nil {
 		return []Deployment{}, err
 	}
@@ -68,8 +68,8 @@ func (dRepo DeploymentRepo) All() ([]Deployment, error) {
 	return drs, err
 }
 
-func (dRepo DeploymentRepo) Save(dep *Deployment) error {
-	res, err := dRepo.DB.Exec(
+func (p deploymentPersister) Save(dep *Deployment) error {
+	res, err := p.db.Exec(
 		"INSERT INTO deployments (name, template, service_ids) VALUES (?,?,?)",
 		dep.Name,
 		dep.Template,
@@ -85,8 +85,8 @@ func (dRepo DeploymentRepo) Save(dep *Deployment) error {
 	return nil
 }
 
-func (dRepo DeploymentRepo) Remove(id int) error {
-	_, err := dRepo.DB.Exec(
+func (p deploymentPersister) Remove(id int) error {
+	_, err := p.db.Exec(
 		"DELETE FROM deployments WHERE id = ?",
 		id,
 	)

@@ -22,17 +22,17 @@ var (
 	adapterServer *httptest.Server
 	baseURI       string
 	router        http.Handler
-	dRepo         repo.Persister
+	rp            repo.Persister
 )
 
 func init() {
-	dRepo = repo.NewPersister("../db/agent_test.db")
+	rp = repo.MakePersister("../db/agent_test.db")
 }
 
 func setup(hdlr http.Handler) {
 	adapterServer = httptest.NewServer(hdlr)
 	ad := adapter.MakeClient(adapterServer.URL)
-	dm := agent.MakeDeploymentManager(dRepo, ad)
+	dm := agent.MakeDeploymentManager(rp, ad)
 	router = NewServer(dm).newRouter()
 	server = httptest.NewServer(router)
 	baseURI = server.URL
