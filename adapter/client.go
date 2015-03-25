@@ -6,24 +6,24 @@ import (
 	"net/http"
 )
 
-type client struct {
-	endpoint string
-	client   *http.Client
+type servicesClient struct {
+	endpoint  string
+	netClient *http.Client
 }
 
-func MakeClient(ep string) AdapterClient {
+func MakeClient(ep string) Client {
 	hc := &http.Client{}
 
-	c := client{
-		client:   hc,
-		endpoint: ep,
+	c := servicesClient{
+		netClient: hc,
+		endpoint:  ep,
 	}
 
 	return c
 }
 
-func (ad client) CreateServices(buf *bytes.Buffer) []Service {
-	resp, _ := ad.client.Post(ad.servicesPath(""), "application/json", buf)
+func (sc servicesClient) CreateServices(buf *bytes.Buffer) []Service {
+	resp, _ := sc.netClient.Post(sc.servicesPath(""), "application/json", buf)
 
 	ars := &[]Service{}
 	jd := json.NewDecoder(resp.Body)
@@ -32,8 +32,8 @@ func (ad client) CreateServices(buf *bytes.Buffer) []Service {
 	return *ars
 }
 
-func (ad client) GetService(sid string) Service {
-	resp, _ := ad.client.Get(ad.servicesPath(sid))
+func (sc servicesClient) GetService(sid string) Service {
+	resp, _ := sc.netClient.Get(sc.servicesPath(sid))
 
 	if resp.StatusCode == http.StatusNotFound {
 		return Service{ID: sid, ActualState: "not found"}
@@ -48,20 +48,20 @@ func (ad client) GetService(sid string) Service {
 	return *srvc
 }
 
-func (ad client) DeleteService(sid string) error {
-	req, err := http.NewRequest("DELETE", ad.servicesPath(sid), nil)
+func (sc servicesClient) DeleteService(sid string) error {
+	req, err := http.NewRequest("DELETE", sc.servicesPath(sid), nil)
 
 	if err != nil {
 		return err
 	}
 
-	_, err = ad.client.Do(req)
+	_, err = sc.netClient.Do(req)
 
 	return err
 }
 
-func (ad client) FetchMetadata() (interface{}, error) {
-	res, err := ad.client.Get(ad.endpoint + "/v1/metadata")
+func (sc servicesClient) FetchMetadata() (interface{}, error) {
+	res, err := sc.netClient.Get(sc.endpoint + "/v1/metadata")
 
 	if err != nil {
 		//TODO
@@ -75,6 +75,6 @@ func (ad client) FetchMetadata() (interface{}, error) {
 	return r, nil
 }
 
-func (ad client) servicesPath(id string) string {
-	return ad.endpoint + "/v1/services/" + id
+func (sc servicesClient) servicesPath(id string) string {
+	return sc.endpoint + "/v1/services/" + id
 }

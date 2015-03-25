@@ -4,8 +4,7 @@ import (
 	"bytes"
 )
 
-//TODO: rename
-type AdapterClient interface {
+type Client interface {
 	CreateServices(*bytes.Buffer) []Service
 	GetService(string) Service
 	DeleteService(string) error

@@ -9,14 +9,14 @@ import (
 )
 
 type DeploymentManager struct {
-	Repo          repo.Persister
-	AdapterClient adapter.AdapterClient
+	Repo   repo.Persister
+	Client adapter.Client
 }
 
-func MakeDeploymentManager(p repo.Persister, ad adapter.AdapterClient) DeploymentManager {
+func MakeDeploymentManager(p repo.Persister, c adapter.Client) DeploymentManager {
 	return DeploymentManager{
-		Repo:          p,
-		AdapterClient: ad,
+		Repo:   p,
+		Client: c,
 	}
 }
 
@@ -52,7 +52,7 @@ func (dm DeploymentManager) GetFullDeployment(qid int) (DeploymentResponseFull, 
 	//TODO: maybe use a constructor for all this.
 	as := make(Services, len(dep.ServiceIDs))
 	for i, sID := range dep.ServiceIDs {
-		srvc := dm.AdapterClient.GetService(sID)
+		srvc := dm.Client.GetService(sID)
 		as[i] = Service{
 			ID:          srvc.ID,
 			ActualState: srvc.ActualState,
@@ -96,7 +96,7 @@ func (dm DeploymentManager) DeleteDeployment(qID int) error {
 	json.Unmarshal([]byte(dep.ServiceIDs), &sIDs)
 
 	for _, sID := range sIDs {
-		dm.AdapterClient.DeleteService(sID)
+		dm.Client.DeleteService(sID)
 	}
 
 	dm.Repo.Remove(qID)
@@ -113,7 +113,7 @@ func (dm DeploymentManager) CreateDeployment(depB DeploymentBlueprint) (Deployme
 		return DeploymentResponseLite{}, err
 	}
 
-	as := dm.AdapterClient.CreateServices(buf)
+	as := dm.Client.CreateServices(buf)
 
 	tn := depB.Template.Name
 	dep, err := makeRepoDeployment(tn, mImgs, as)
@@ -159,7 +159,7 @@ func (dm DeploymentManager) ReDeploy(ID int) (DeploymentResponseLite, error) {
 }
 
 func (dm DeploymentManager) FetchMetadata() (Metadata, error) {
-	adapterMeta, _ := dm.AdapterClient.FetchMetadata()
+	adapterMeta, _ := dm.Client.FetchMetadata()
 
 	md := Metadata{
 		Agent: struct {
