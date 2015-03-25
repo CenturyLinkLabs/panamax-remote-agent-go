@@ -6,3 +6,10 @@ type Deployment struct {
 	ServiceIDs string
 	Template   string
 }
+
+type Persister interface {
+	FindByID(int) (Deployment, error)
+	All() ([]Deployment, error)
+	Save(*Deployment) error
+	Remove(int) error
+}

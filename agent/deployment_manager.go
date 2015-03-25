@@ -8,20 +8,12 @@ import (
 	"github.com/CenturyLinkLabs/panamax-remote-agent-go/repo"
 )
 
-// TODO: move this into repo
-type DeploymentRepo interface {
-	FindByID(int) (repo.Deployment, error)
-	All() ([]repo.Deployment, error)
-	Save(*repo.Deployment) error
-	Remove(int) error
-}
-
 type DeploymentManager struct {
-	Repo          DeploymentRepo
+	Repo          repo.Persister
 	AdapterClient adapter.AdapterClient
 }
 
-func MakeDeploymentManager(dRepo DeploymentRepo, ad adapter.AdapterClient) DeploymentManager {
+func MakeDeploymentManager(dRepo repo.Persister, ad adapter.AdapterClient) DeploymentManager {
 	return DeploymentManager{
 		Repo:          dRepo,
 		AdapterClient: ad,

@@ -22,11 +22,11 @@ var (
 	adapterServer *httptest.Server
 	baseURI       string
 	router        http.Handler
-	dRepo         repo.DeploymentRepo
+	dRepo         repo.Persister
 )
 
 func init() {
-	dRepo = repo.NewDeploymentRepo("../db/agent_test.db")
+	dRepo = repo.NewPersister("../db/agent_test.db")
 }
 
 func setup(hdlr http.Handler) {

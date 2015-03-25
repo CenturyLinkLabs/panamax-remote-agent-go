@@ -15,7 +15,7 @@ type DeploymentRepo struct {
 	DB *sql.DB
 }
 
-func NewDeploymentRepo(dbPath string) DeploymentRepo {
+func NewPersister(dbPath string) Persister {
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		fmt.Println(err)
