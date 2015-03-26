@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func ListDeployments(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
+func listDeployments(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
 	drs, err := dm.ListDeployments()
 	if err != nil {
 		log.Fatal(err)
@@ -19,7 +19,7 @@ func ListDeployments(dm agent.DeploymentManager, w http.ResponseWriter, r *http.
 	json.NewEncoder(w).Encode(drs)
 }
 
-func CreateDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
+func createDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
 	depB := &agent.DeploymentBlueprint{}
 	jd := json.NewDecoder(r.Body)
 	jd.Decode(depB)
@@ -38,7 +38,7 @@ func CreateDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http
 	w.Write(drj)
 }
 
-func DeleteDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
+func deleteDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
 	if err := dm.DeleteDeployment(idFromQuery(mux.Vars(r))); err != nil {
 		log.Fatal(err)
 	}
@@ -46,7 +46,7 @@ func DeleteDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func ShowDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
+func showDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
 	dr, err := dm.GetFullDeployment(idFromQuery(mux.Vars(r)))
 	if err != nil {
 		log.Fatal(err)
@@ -55,7 +55,7 @@ func ShowDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.R
 	json.NewEncoder(w).Encode(dr)
 }
 
-func ReDeploy(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
+func reDeploy(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
 	dr, err := dm.ReDeploy(idFromQuery(mux.Vars(r)))
 	if err != nil {
 		log.Fatal(err)
@@ -65,7 +65,7 @@ func ReDeploy(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request
 	json.NewEncoder(w).Encode(dr)
 }
 
-func Metadata(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
+func metadata(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
 	md, _ := dm.FetchMetadata()
 
 	w.WriteHeader(http.StatusOK)

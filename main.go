@@ -18,7 +18,7 @@ func main() {
 	}
 	c := adapter.MakeClient(adapterEndpoint())
 	dm := agent.MakeDeploymentManager(p, c)
-	s := api.NewServer(dm)
+	s := api.MakeServer(dm)
 	s.Start(":1234")
 }
 

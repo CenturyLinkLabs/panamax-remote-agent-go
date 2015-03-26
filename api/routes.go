@@ -3,50 +3,48 @@ package api
 import "net/http"
 import "github.com/CenturyLinkLabs/panamax-remote-agent-go/agent"
 
-type Route struct {
+type route struct {
 	Name        string
 	Method      string
 	Pattern     string
 	HandlerFunc func(agent.DeploymentManager, http.ResponseWriter, *http.Request)
 }
 
-type Routes []Route
-
-var routes = Routes{
+var routes = []route{
 	{
-		"ShowDeployment",
+		"showDeployment",
 		"GET",
 		"/deployments/{id}",
-		ShowDeployment,
+		showDeployment,
 	},
 	{
-		"ListDeployments",
+		"listDeployments",
 		"GET",
 		"/deployments",
-		ListDeployments,
+		listDeployments,
 	},
 	{
-		"CreateDeployment",
+		"createDeployment",
 		"POST",
 		"/deployments",
-		CreateDeployment,
+		createDeployment,
 	},
 	{
-		"DeleteDeployment",
+		"deleteDeployment",
 		"DELETE",
 		"/deployments/{id}",
-		DeleteDeployment,
+		deleteDeployment,
 	},
 	{
-		"ReDeploy",
+		"reDeploy",
 		"POST",
 		"/deployments/{id}/redeploy",
-		ReDeploy,
+		reDeploy,
 	},
 	{
-		"Metadata",
+		"metadata",
 		"GET",
 		"/metadata",
-		Metadata,
+		metadata,
 	},
 }

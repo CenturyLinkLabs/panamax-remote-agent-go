@@ -33,7 +33,7 @@ func setup(hdlr http.Handler) {
 	adapterServer = httptest.NewServer(hdlr)
 	c := adapter.MakeClient(adapterServer.URL)
 	dm := agent.MakeDeploymentManager(rp, c)
-	router = NewServer(dm).newRouter()
+	router = MakeServer(dm).newRouter()
 	server = httptest.NewServer(router)
 	baseURI = server.URL
 }
@@ -50,7 +50,7 @@ func getAllDeployments() []agent.DeploymentResponseLite {
 	}
 	defer res.Body.Close()
 
-	drs := make([]agent.DeploymentResponseLite, 0)
+	var drs []agent.DeploymentResponseLite
 	jd := json.NewDecoder(res.Body)
 	if err := jd.Decode(&drs); err != nil {
 		panic(err)
@@ -279,7 +279,7 @@ func TestListDeploymentsWhenOneExists(t *testing.T) {
 	res, _ := doGET(baseURI + "/deployments")
 	defer res.Body.Close()
 
-	drs := make([]agent.DeploymentResponseLite, 0)
+	var drs []agent.DeploymentResponseLite
 	jd := json.NewDecoder(res.Body)
 	if err := jd.Decode(&drs); err != nil {
 		panic(err)

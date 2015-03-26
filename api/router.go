@@ -9,11 +9,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// A Server is the HTTP server which responds to API requests.
 type Server struct {
 	DeploymentManager agent.DeploymentManager
 }
 
-func NewServer(dm agent.DeploymentManager) Server {
+// MakeServer returns a new Server instance containting a manager to which it will defer work.
+func MakeServer(dm agent.DeploymentManager) Server {
 	return Server{DeploymentManager: dm}
 }
 
@@ -52,6 +54,7 @@ func (s Server) newRouter() *mux.Router {
 	return r
 }
 
+// Start initializes a router and starts the server at a given address.
 func (s Server) Start(addr string) {
 	r := s.newRouter()
 	log.Fatal(http.ListenAndServe(addr, r))
