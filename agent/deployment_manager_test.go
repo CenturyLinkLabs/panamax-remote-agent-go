@@ -220,7 +220,7 @@ func TestSucessfulGetFullDeployment(t *testing.T) {
 		Name: "Full booyah",
 		Status: Status{
 			Services: []Service{
-				Service{
+				{
 					ID:          "wp-pod",
 					ActualState: "running",
 				},
