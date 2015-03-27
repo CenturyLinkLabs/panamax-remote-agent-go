@@ -18,8 +18,16 @@ func main() {
 	}
 	c := adapter.MakeClient(adapterEndpoint())
 	dm := agent.MakeDeploymentManager(p, c)
-	s := api.MakeServer(dm)
+	s := api.MakeServer(dm, username(), password())
 	s.Start(serverPort())
+}
+
+func username() string {
+	return os.Getenv("REMOTE_AGENT_ID")
+}
+
+func password() string {
+	return os.Getenv("REMOTE_AGENT_API_KEY")
 }
 
 func dbLocation() string {

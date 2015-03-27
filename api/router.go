@@ -12,11 +12,17 @@ import (
 // A Server is the HTTP server which responds to API requests.
 type Server struct {
 	DeploymentManager agent.DeploymentManager
+	username          string
+	password          string
 }
 
 // MakeServer returns a new Server instance containting a manager to which it will defer work.
-func MakeServer(dm agent.DeploymentManager) Server {
-	return Server{DeploymentManager: dm}
+func MakeServer(dm agent.DeploymentManager, un string, pw string) Server {
+	return Server{
+		DeploymentManager: dm,
+		username:          un,
+		password:          pw,
+	}
 }
 
 func (s Server) newRouter() *mux.Router {
@@ -27,6 +33,12 @@ func (s Server) newRouter() *mux.Router {
 	for _, route := range routes {
 		fct := route.HandlerFunc
 		wrap := func(w http.ResponseWriter, r *http.Request) {
+
+			if !s.isAuthenticated(r) {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
 			// make it json
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
@@ -58,4 +70,14 @@ func (s Server) newRouter() *mux.Router {
 func (s Server) Start(addr string) {
 	r := s.newRouter()
 	log.Fatal(http.ListenAndServe(addr, r))
+}
+
+func (s Server) isAuthenticated(r *http.Request) bool {
+	un, pw, ok := r.BasicAuth()
+
+	if ok && (un == s.username) && (pw == s.password) {
+		return true
+	}
+
+	return false
 }

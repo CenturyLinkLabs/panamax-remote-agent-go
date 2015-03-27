@@ -33,7 +33,7 @@ func setup(hdlr http.Handler) {
 	adapterServer = httptest.NewServer(hdlr)
 	c := adapter.MakeClient(adapterServer.URL)
 	dm := agent.MakeDeploymentManager(rp, c)
-	router = MakeServer(dm).newRouter()
+	router = MakeServer(dm, "user", "pass").newRouter()
 	server = httptest.NewServer(router)
 	baseURI = server.URL
 }
@@ -68,6 +68,7 @@ func doGET(url string) (*http.Response, error) {
 	}
 
 	req.Header.Add("Accept", "application/json")
+	req.SetBasicAuth("user", "pass")
 
 	res, errr := c.Do(req)
 	if errr != nil {
@@ -87,6 +88,7 @@ func doPOST(url string, r io.Reader) (*http.Response, error) {
 
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
+	req.SetBasicAuth("user", "pass")
 
 	res, errr := c.Do(req)
 	if errr != nil {
@@ -106,6 +108,7 @@ func doDELETE(url string) (*http.Response, error) {
 
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
+	req.SetBasicAuth("user", "pass")
 
 	res, errr := c.Do(req)
 	if errr != nil {
