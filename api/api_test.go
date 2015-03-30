@@ -33,7 +33,7 @@ func setup(hdlr http.Handler) {
 	adapterServer = httptest.NewServer(hdlr)
 	c := adapter.MakeClient(adapterServer.URL)
 	dm := agent.MakeDeploymentManager(rp, c)
-	router = MakeServer(dm, "user", "pass").newRouter()
+	router = MakeServer(dm, "user", "pass", "", "").newRouter()
 	server = httptest.NewServer(router)
 	baseURI = server.URL
 }

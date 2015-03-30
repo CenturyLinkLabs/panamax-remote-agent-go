@@ -14,15 +14,26 @@ type Server struct {
 	DeploymentManager agent.DeploymentManager
 	username          string
 	password          string
+	certFile          string
+	keyFile           string
 }
 
 // MakeServer returns a new Server instance containting a manager to which it will defer work.
-func MakeServer(dm agent.DeploymentManager, un string, pw string) Server {
+func MakeServer(dm agent.DeploymentManager, un string, pw string, cf string, kf string) Server {
 	return Server{
 		DeploymentManager: dm,
 		username:          un,
 		password:          pw,
+		certFile:          cf,
+		keyFile:           kf,
 	}
+}
+
+// Start initializes a router and starts the server at a given address.
+func (s Server) Start(addr string) {
+	r := s.newRouter()
+
+	log.Fatal(http.ListenAndServeTLS(addr, s.certFile, s.keyFile, r))
 }
 
 func (s Server) newRouter() *mux.Router {
@@ -64,12 +75,6 @@ func (s Server) newRouter() *mux.Router {
 	}
 
 	return r
-}
-
-// Start initializes a router and starts the server at a given address.
-func (s Server) Start(addr string) {
-	r := s.newRouter()
-	log.Fatal(http.ListenAndServe(addr, r))
 }
 
 func (s Server) isAuthenticated(r *http.Request) bool {

@@ -18,7 +18,13 @@ func main() {
 	}
 	c := adapter.MakeClient(adapterEndpoint())
 	dm := agent.MakeDeploymentManager(p, c)
-	s := api.MakeServer(dm, username(), password())
+	s := api.MakeServer(
+		dm,
+		username(),
+		password(),
+		certFile(),
+		keyFile(),
+	)
 	s.Start(serverPort())
 }
 
@@ -28,6 +34,14 @@ func username() string {
 
 func password() string {
 	return os.Getenv("REMOTE_AGENT_API_KEY")
+}
+
+func keyFile() string {
+	return "/usr/local/share/certs/pmx_remote_agent.key"
+}
+
+func certFile() string {
+	return "/usr/local/share/certs/pmx_remote_agent.crt"
 }
 
 func dbLocation() string {
