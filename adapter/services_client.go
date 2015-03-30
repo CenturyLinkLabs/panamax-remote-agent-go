@@ -11,6 +11,7 @@ type servicesClient struct {
 	netClient *http.Client
 }
 
+// MakeClient returns a Client connected with the adapter.
 func MakeClient(ep string) Client {
 	hc := &http.Client{}
 
