@@ -9,8 +9,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// A Server is the HTTP server which responds to API requests.
-type Server struct {
+type secureServer struct {
 	DeploymentManager agent.DeploymentManager
 	username          string
 	password          string
@@ -20,7 +19,7 @@ type Server struct {
 
 // MakeServer returns a new Server instance containting a manager to which it will defer work.
 func MakeServer(dm agent.DeploymentManager, un string, pw string, cf string, kf string) Server {
-	return Server{
+	return secureServer{
 		DeploymentManager: dm,
 		username:          un,
 		password:          pw,
@@ -29,14 +28,13 @@ func MakeServer(dm agent.DeploymentManager, un string, pw string, cf string, kf 
 	}
 }
 
-// Start initializes a router and starts the server at a given address.
-func (s Server) Start(addr string) {
+func (s secureServer) Start(addr string) {
 	r := s.newRouter()
 
 	log.Fatal(http.ListenAndServeTLS(addr, s.certFile, s.keyFile, r))
 }
 
-func (s Server) newRouter() *mux.Router {
+func (s secureServer) newRouter() *mux.Router {
 	r := mux.NewRouter()
 
 	dm := s.DeploymentManager
@@ -77,7 +75,7 @@ func (s Server) newRouter() *mux.Router {
 	return r
 }
 
-func (s Server) isAuthenticated(r *http.Request) bool {
+func (s secureServer) isAuthenticated(r *http.Request) bool {
 	un, pw, ok := r.BasicAuth()
 
 	if ok && (un == s.username) && (pw == s.password) {
