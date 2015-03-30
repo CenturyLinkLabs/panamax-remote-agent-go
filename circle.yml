@@ -1,0 +1,20 @@
+machine:
+  services:
+    - docker
+  environment:
+    IMAGE_NAME: centurylink/panamax-remote-agent-go
+    IMAGE_TAG: qa
+
+
+general:
+  artifacts:
+    - "panamax-remote-agent-go" # the built binary
+
+dependencies:
+  override:
+    - docker pull centurylink/golang-tester:latest
+    - docker pull centurylink/golang-builder:latest
+
+test:
+  override:
+    - docker run -v $(pwd):/src centurylink/golang-tester
