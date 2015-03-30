@@ -11,6 +11,7 @@ const (
 	dbDriver = "sqlite"
 )
 
+// MakePersister returns a persister ready for action.
 func MakePersister(dbPath string) (Persister, error) {
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {

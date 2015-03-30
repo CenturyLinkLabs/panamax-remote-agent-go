@@ -1,5 +1,6 @@
 package repo
 
+// Deployment represents a persist-able deployment.
 type Deployment struct {
 	ID         int
 	Name       string
@@ -7,6 +8,7 @@ type Deployment struct {
 	Template   string
 }
 
+// Persister is the interface representing necessary persistence actions.
 type Persister interface {
 	FindByID(int) (Deployment, error)
 	All() ([]Deployment, error)
