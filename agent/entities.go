@@ -4,11 +4,15 @@ import (
 	"encoding/json"
 )
 
+// A DeploymentBlueprint is the top level entity, containing all the
+// necessary bits to kick off a deployment.
 type DeploymentBlueprint struct {
 	Override Template `json:"override,omitempty"`
 	Template Template `json:"template,omitempty"`
 }
 
+// MergedImages merges the Override on top of the Template, returning the
+// resulting merged Images to be used for deployment.
 func (d *DeploymentBlueprint) MergedImages() []Image {
 	mImgs := make([]Image, len(d.Template.Images), len(d.Template.Images))
 
@@ -24,11 +28,14 @@ func (d *DeploymentBlueprint) MergedImages() []Image {
 	return mImgs
 }
 
+// A Template is the 2nd level entity in the DeploymentBlueprint scheme.
+// It contains all the necessary information for a deployment post override logic.
 type Template struct {
 	Name   string  `json:"name,omitempty"`
 	Images []Image `json:"images,omitempty"`
 }
 
+// An Image ultimately represents the deployed Docker image.
 type Image struct {
 	Name        string
 	Source      string
@@ -42,6 +49,8 @@ type Image struct {
 	VolumesFrom []string
 }
 
+// MarshalJSON is used to strip out empty/default value structs when
+// marshalling images to JSON.
 func (img Image) MarshalJSON() ([]byte, error) {
 	i := map[string]interface{}{}
 
@@ -106,30 +115,42 @@ func (img *Image) overrideEnv(o Image) {
 	img.Environment = envs
 }
 
+// Environment represents each environment variable that will be passed
+// to the Docker run command.
 type Environment struct {
 	Variable string `json:"variable,omitempty"`
 	Value    string `json:"value,omitempty"`
 }
 
+// Link represents each Link that will be passed
+// to the Docker run command.
 type Link struct {
 	Service string `json:"service,omitempty"`
 	Alias   string `json:"alias,omitempty"`
 }
 
+// Port represents each Port mapping that will be passed
+// to the Docker run command.
 type Port struct {
 	HostPort      int `json:"hostPort,omitempty"`
 	ContainerPort int `json:"containerPort,omitempty"`
 }
 
+// DeploymentSettings contains orchestrator specific information
+// to be used when deploying an application.
 type DeploymentSettings struct {
 	Count int `json:"count,omitempty"`
 }
 
+// A Volume represents each Volume mapping that will be passed
+// to the Docker run command.
 type Volume struct {
 	ContainerPath string `json:"containerPath"`
 	HostPath      string `json:"hostPath"`
 }
 
+// DeploymentResponseLite is the minimal representation of a Deployment
+// typically used for listings, etc.
 type DeploymentResponseLite struct {
 	ID           int      `json:"id"`
 	Name         string   `json:"name"`
@@ -137,6 +158,8 @@ type DeploymentResponseLite struct {
 	ServiceIDs   []string `json:"service_ids"`
 }
 
+// DeploymentResponseFull is the robust representation of a Deployment
+// typically used for the return value of an individual deployment, etc.
 type DeploymentResponseFull struct {
 	ID           int    `json:"id"`
 	Name         string `json:"name"`
@@ -144,15 +167,19 @@ type DeploymentResponseFull struct {
 	Status       Status `json:"status"`
 }
 
+// Status contains information for health of each service in a Deployment.
 type Status struct {
 	Services []Service `json:"services"`
 }
 
+// Service represents each service in a Deployment and contains the ID,
+// as well as its state.
 type Service struct {
 	ID          string `json:"id"`
 	ActualState string `json:"actualState"`
 }
 
+// Metadata contains general meta data for both the Agent and the Adapter.
 type Metadata struct {
 	Agent struct {
 		Version string `json:"version"`
