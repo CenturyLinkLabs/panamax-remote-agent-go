@@ -4,6 +4,8 @@
 
 # panamax-remote-agent-go
 
+[![Circle CI](https://circleci.com/gh/CenturyLinkLabs/panamax-remote-agent-go.svg?style=svg)](https://circleci.com/gh/CenturyLinkLabs/panamax-remote-agent-go)
+
 Replaces [CenturyLinkLabs/panamax-remote-agent](https://github.com/CenturyLinkLabs/panamax-remote-agent)
 
 ## Installation for development
