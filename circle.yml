@@ -17,4 +17,5 @@ dependencies:
 
 test:
   override:
+    - cp $(pwd)/db/{agent.db.example,agent_test.db}
     - docker run -v $(pwd):/src centurylink/golang-tester
