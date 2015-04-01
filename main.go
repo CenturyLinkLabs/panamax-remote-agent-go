@@ -1,6 +1,7 @@
 package main // import "github.com/CenturyLinkLabs/panamax-remote-agent-go"
 
 import (
+	"flag"
 	"log"
 	"os"
 	"regexp"
@@ -12,20 +13,33 @@ import (
 )
 
 func main() {
+	sf := flag.Bool("secure", true, "whether or not to use SSL and BasicAuth, defaults to true")
+	flag.Parse()
+
 	p, err := repo.MakePersister(dbLocation())
 	if err != nil {
 		log.Fatal(err)
 	}
 	c := adapter.MakeClient(adapterEndpoint())
 	dm := agent.MakeDeploymentManager(p, c)
-	s := api.MakeServer(
-		dm,
-		username(),
-		password(),
-		certFile(),
-		keyFile(),
-	)
+	s := makeServer(dm, sf)
 	s.Start(serverPort())
+}
+
+func makeServer(dm agent.Manager, sf *bool) api.Server {
+	log.Printf("secure?: %t", *sf)
+
+	if *sf {
+		return api.MakeServer(
+			dm,
+			username(),
+			password(),
+			certFile(),
+			keyFile(),
+		)
+	} else {
+		return api.MakeInsecureServer(dm)
+	}
 }
 
 func username() string {
