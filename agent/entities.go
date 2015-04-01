@@ -129,11 +129,29 @@ type Link struct {
 	Alias   string `json:"alias,omitempty"`
 }
 
+// MarshalJSON produces the JSON expected by the adapter
+// Which is different than the json sent by the client
+func (ln Link) MarshalJSON() ([]byte, error) {
+	i := map[string]interface{}{}
+	i["name"] = ln.Service
+	i["alias"] = ln.Alias
+	return json.Marshal(i)
+}
+
 // Port represents each Port mapping that will be passed
 // to the Docker run command.
 type Port struct {
-	HostPort      int `json:"hostPort,omitempty"`
-	ContainerPort int `json:"containerPort,omitempty"`
+	HostPort      int `json:"host_port,omitempty"`
+	ContainerPort int `json:"container_port,omitempty"`
+}
+
+// MarshalJSON produces the JSON expected by the adapter
+// Which is different than the json sent by the client
+func (p Port) MarshalJSON() ([]byte, error) {
+	i := map[string]interface{}{}
+	i["hostPort"] = p.HostPort
+	i["containerPort"] = p.ContainerPort
+	return json.Marshal(i)
 }
 
 // DeploymentSettings contains orchestrator specific information
@@ -145,8 +163,17 @@ type DeploymentSettings struct {
 // A Volume represents each Volume mapping that will be passed
 // to the Docker run command.
 type Volume struct {
-	ContainerPath string `json:"containerPath"`
-	HostPath      string `json:"hostPath"`
+	ContainerPath string `json:"container_path"`
+	HostPath      string `json:"host_path"`
+}
+
+// MarshalJSON produces the JSON expected by the adapter
+// Which is different than the json sent by the client
+func (v Volume) MarshalJSON() ([]byte, error) {
+	i := map[string]interface{}{}
+	i["hostPath"] = v.HostPath
+	i["containerPath"] = v.ContainerPath
+	return json.Marshal(i)
 }
 
 // DeploymentResponseLite is the minimal representation of a Deployment

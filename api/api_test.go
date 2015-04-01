@@ -192,7 +192,7 @@ func TestCreateDeployment(t *testing.T) {
 						{ "service":"mysql", "alias":"DB_1" }
 					],
 					"ports":[
-						{ "hostPort":8000, "containerPort":80 }
+						{ "host_port":8000, "container_port":80 }
 					],
 					"environment":[
 						{ "variable":"DB_PASSWORD", "value":"pass@word01" },
@@ -207,11 +207,11 @@ func TestCreateDeployment(t *testing.T) {
 						{ "variable":"MYSQL_ROOT_PASSWORD", "value":"pass@word01" }
 					],
 					"ports":[
-						{ "hostPort":3306, "containerPort":3306 }
+						{ "host_port":3306, "container_port":3306 }
 					],
 					"expose": [1234, 5678],
 					"volumes": [
-						{"hostPath":"foo/bar", "containerPath":"/var/bar"}
+						{"host_path":"foo/bar", "container_path":"/var/bar"}
 					],
 					"volumesFrom":["wp"],
 					"command":"./run.sh"
@@ -241,9 +241,9 @@ func TestCreateDeployment(t *testing.T) {
 			"command":"./run.sh",
 			"deployment":{"count":1},
 			"environment":[{"variable":"DB_PASSWORD","value":"pass@word02"},{"variable":"DB_NAME","value":"wordpress"}],
-			"links":[{"service":"mysql","alias":"DB_1"}],
+			"links":[{"alias":"DB_1","name":"mysql"}],
 			"name":"wp",
-			"ports":[{"hostPort":8000,"containerPort":80}],
+			"ports":[{"containerPort":80,"hostPort":8000}],
 			"source":"centurylink/wordpress:3.9.1"
 		},
 		{
@@ -251,7 +251,7 @@ func TestCreateDeployment(t *testing.T) {
 			"environment":[{"variable":"MYSQL_ROOT_PASSWORD","value":"pass@word02"}],
 			"expose":[1234,5678],
 			"name":"mysql",
-			"ports":[{"hostPort":3306,"containerPort":3306}],
+			"ports":[{"containerPort":3306,"hostPort":3306}],
 			"source":"centurylink/mysql:5.5",
 			"volumes":[{"containerPath":"/var/bar","hostPath":"foo/bar"}],
 			"volumesFrom":["wp"]

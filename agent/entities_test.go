@@ -130,9 +130,9 @@ func TestFullImageProducesProperJSON(t *testing.T) {
 		"deployment":{"count":2},
 		"environment":[{"variable":"FOO","value":"bar"}],
 		"expose":[33,44],
-		"links":[{"service":"bla","alias":"b"}],
+		"links":[{"alias":"b","name":"bla"}],
 		"name":"foo",
-		"ports":[{"hostPort":22,"containerPort":23}],
+		"ports":[{"containerPort":23,"hostPort":22}],
 		"source":"bar/foo",
 		"volumes":[{"containerPath":"/var","hostPath":"/usr"}],
 		"volumesFrom":["/viz"]
