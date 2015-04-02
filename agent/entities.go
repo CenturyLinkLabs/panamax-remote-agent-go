@@ -2,6 +2,7 @@ package agent
 
 import (
 	"encoding/json"
+	"strconv"
 )
 
 // A DeploymentBlueprint is the top level entity, containing all the
@@ -35,6 +36,29 @@ type Template struct {
 	Images []Image `json:"images,omitempty"`
 }
 
+// FromIntOrString allows source JSON to provide either an int or a string and
+// have it be unmarshalled to an int.
+type FromIntOrString struct {
+	Value int
+}
+
+// UnmarshalJSON implements the json.Unmarshaller interface.
+func (i *FromIntOrString) UnmarshalJSON(value []byte) error {
+	if value[0] == '"' {
+		var s string
+		err := json.Unmarshal(value, &s)
+		i.Value, _ = strconv.Atoi(s)
+		return err
+	}
+
+	return json.Unmarshal(value, &i.Value)
+}
+
+// MarshalJSON implements the json.Marshaller interface.
+func (i FromIntOrString) MarshalJSON() ([]byte, error) {
+	return json.Marshal(i.Value)
+}
+
 // An Image ultimately represents the deployed Docker image.
 type Image struct {
 	Name        string
@@ -44,7 +68,7 @@ type Image struct {
 	Links       []Link
 	Environment []Environment
 	Ports       []Port
-	Expose      []int
+	Expose      []FromIntOrString
 	Volumes     []Volume
 	VolumesFrom []string
 }
@@ -141,8 +165,8 @@ func (ln Link) MarshalJSON() ([]byte, error) {
 // Port represents each Port mapping that will be passed
 // to the Docker run command.
 type Port struct {
-	HostPort      int `json:"host_port,omitempty"`
-	ContainerPort int `json:"container_port,omitempty"`
+	HostPort      FromIntOrString `json:"host_port,omitempty"`
+	ContainerPort FromIntOrString `json:"container_port,omitempty"`
 }
 
 // MarshalJSON produces the JSON expected by the adapter
@@ -157,7 +181,7 @@ func (p Port) MarshalJSON() ([]byte, error) {
 // DeploymentSettings contains orchestrator specific information
 // to be used when deploying an application.
 type DeploymentSettings struct {
-	Count int `json:"count,omitempty"`
+	Count FromIntOrString `json:"count,omitempty"`
 }
 
 // A Volume represents each Volume mapping that will be passed

@@ -370,7 +370,7 @@ func TestCreateDeploymentPersistedTheMergedTemplate(t *testing.T) {
 			Images: []Image{
 				{
 					Name:       "wp",
-					Deployment: DeploymentSettings{Count: 1},
+					Deployment: DeploymentSettings{Count: FromIntOrString{1}},
 				},
 			},
 		},
@@ -378,7 +378,7 @@ func TestCreateDeploymentPersistedTheMergedTemplate(t *testing.T) {
 			Images: []Image{
 				{
 					Name:       "wp",
-					Deployment: DeploymentSettings{Count: 2},
+					Deployment: DeploymentSettings{Count: FromIntOrString{2}},
 				},
 			},
 		},
@@ -390,5 +390,5 @@ func TestCreateDeploymentPersistedTheMergedTemplate(t *testing.T) {
 	json.Unmarshal([]byte(passedDep.Template), &tpl)
 
 	assert.NoError(t, err)
-	assert.Equal(t, 2, tpl.Images[0].Deployment.Count)
+	assert.Equal(t, FromIntOrString{2}, tpl.Images[0].Deployment.Count)
 }
