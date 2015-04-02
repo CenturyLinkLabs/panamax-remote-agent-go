@@ -23,30 +23,43 @@ func MakeClient(ep string) Client {
 	return c
 }
 
-func (sc servicesClient) CreateServices(buf *bytes.Buffer) []Service {
-	resp, _ := sc.netClient.Post(sc.servicesPath(""), "application/json", buf)
+func (sc servicesClient) CreateServices(buf *bytes.Buffer) ([]Service, error) {
+	resp, err := sc.netClient.Post(sc.servicesPath(""), "application/json", buf)
+	defer resp.Body.Close()
+	if err != nil {
+		return []Service{}, err
+	}
 
 	ars := &[]Service{}
 	jd := json.NewDecoder(resp.Body)
-	jd.Decode(ars)
+	err = jd.Decode(ars)
+	if err != nil {
+		return []Service{}, err
+	}
 
-	return *ars
+	return *ars, nil
 }
 
-func (sc servicesClient) GetService(sid string) Service {
-	resp, _ := sc.netClient.Get(sc.servicesPath(sid))
+func (sc servicesClient) GetService(sid string) (Service, error) {
+	resp, err := sc.netClient.Get(sc.servicesPath(sid))
+	defer resp.Body.Close()
+	if err != nil {
+		return Service{}, err
+	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		return Service{ID: sid, ActualState: "not found"}
+		return Service{ID: sid, ActualState: "not found"}, nil
 	} else if resp.StatusCode != http.StatusOK {
-		return Service{ID: sid, ActualState: "error"}
+		return Service{ID: sid, ActualState: "error"}, nil
 	}
 
 	srvc := &Service{}
 	jd := json.NewDecoder(resp.Body)
-	jd.Decode(srvc)
+	if err := jd.Decode(srvc); err != nil {
+		return Service{}, err
+	}
 
-	return *srvc
+	return *srvc, nil
 }
 
 func (sc servicesClient) DeleteService(sid string) error {
@@ -70,7 +83,9 @@ func (sc servicesClient) FetchMetadata() (interface{}, error) {
 
 	var r interface{}
 	jd := json.NewDecoder(res.Body)
-	jd.Decode(&r)
+	if err := jd.Decode(&r); err != nil {
+		return nil, err
+	}
 
 	return r, nil
 }

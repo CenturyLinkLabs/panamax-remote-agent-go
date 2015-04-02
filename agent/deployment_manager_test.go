@@ -50,17 +50,17 @@ type fakeAdapterClient struct {
 	callbackForFetchMetadata  func() (interface{}, error)
 }
 
-func (fc fakeAdapterClient) CreateServices(b *bytes.Buffer) []adapter.Service {
+func (fc fakeAdapterClient) CreateServices(b *bytes.Buffer) ([]adapter.Service, error) {
 	if fc.callbackForCreateServices != nil {
-		return fc.callbackForCreateServices(b)
+		return fc.callbackForCreateServices(b), nil
 	}
-	return []adapter.Service{}
+	return []adapter.Service{}, nil
 }
-func (fc fakeAdapterClient) GetService(sID string) adapter.Service {
+func (fc fakeAdapterClient) GetService(sID string) (adapter.Service, error) {
 	if fc.callbackForGetService != nil {
-		return fc.callbackForGetService(sID)
+		return fc.callbackForGetService(sID), nil
 	}
-	return adapter.Service{}
+	return adapter.Service{}, nil
 }
 func (fc fakeAdapterClient) DeleteService(sID string) error {
 	if fc.callbackForDeleteService != nil {
@@ -156,14 +156,24 @@ func TestSuccessfulGetDeploymentWithNoTemplate(t *testing.T) {
 	fr := fakeRepo{
 		callbackForFind: func(qID int) (repo.Deployment, error) {
 			dr := repo.Deployment{
-				ID:   8,
-				Name: "NO TEMPLATE",
+				ID:         8,
+				Name:       "NO TEMPLATE",
+				ServiceIDs: "",
 			}
 
 			return dr, nil
 		},
 	}
-	dm := MakeDeploymentManager(fr, fakeAdapterClient{})
+	fc := fakeAdapterClient{
+		callbackForGetService: func(qID string) adapter.Service {
+			return adapter.Service{
+				ID:          "wp-pod",
+				ActualState: "running",
+			}
+		},
+	}
+
+	dm := MakeDeploymentManager(fr, fc)
 
 	dr, err := dm.GetDeployment(7)
 
@@ -302,13 +312,23 @@ func TestDeleteDeploymentWhenServiceDeletionFails(t *testing.T) {
 			return errors.New("failed to delete service")
 		},
 	}
+	fr := fakeRepo{
+		callbackForFind: func(qID int) (repo.Deployment, error) {
+			dr := repo.Deployment{
+				ID:         7,
+				Name:       "To be deleted",
+				ServiceIDs: `["wp-pod"]`,
+			}
 
-	dm := MakeDeploymentManager(fakeRepo{}, fc)
+			return dr, nil
+		},
+	}
+
+	dm := MakeDeploymentManager(fr, fc)
 
 	err := dm.DeleteDeployment(7)
 
-	// We don't care that it failed
-	assert.NoError(t, err)
+	assert.EqualError(t, err, "failed to delete service")
 }
 
 func TestDeleteDeploymentRepoDeletionFails(t *testing.T) {
@@ -331,12 +351,7 @@ func TestDeleteDeploymentRepoDeletionFails(t *testing.T) {
 
 	err := dm.DeleteDeployment(7)
 
-	// We don't care that it failed
-	assert.NoError(t, err)
-}
-
-func TestSuccessfulCreateDeployment(t *testing.T) {
-
+	assert.EqualError(t, err, "failed")
 }
 
 func TestCreateDeploymentPersistedTheMergedTemplate(t *testing.T) {

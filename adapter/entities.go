@@ -7,8 +7,8 @@ import (
 // Client is the interface representing all the use cases required
 // to interact with an adapter.
 type Client interface {
-	CreateServices(*bytes.Buffer) []Service
-	GetService(string) Service
+	CreateServices(*bytes.Buffer) ([]Service, error)
+	GetService(string) (Service, error)
 	DeleteService(string) error
 	FetchMetadata() (interface{}, error)
 }

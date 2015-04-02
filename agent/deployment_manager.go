@@ -55,7 +55,10 @@ func (dm DeploymentManager) GetFullDeployment(qid int) (DeploymentResponseFull, 
 
 	as := make([]Service, len(dep.ServiceIDs), len(dep.ServiceIDs))
 	for i, sID := range dep.ServiceIDs {
-		srvc := dm.Client.GetService(sID)
+		srvc, err := dm.Client.GetService(sID)
+		if err != nil {
+			return DeploymentResponseFull{}, err
+		}
 		as[i] = Service{
 			ID:          srvc.ID,
 			ActualState: srvc.ActualState,
@@ -99,13 +102,19 @@ func (dm DeploymentManager) DeleteDeployment(qID int) error {
 	}
 
 	var sIDs []string
-	json.Unmarshal([]byte(dep.ServiceIDs), &sIDs)
-
-	for _, sID := range sIDs {
-		dm.Client.DeleteService(sID)
+	if err := json.Unmarshal([]byte(dep.ServiceIDs), &sIDs); err != nil {
+		return err
 	}
 
-	dm.Repo.Remove(qID)
+	for _, sID := range sIDs {
+		if err := dm.Client.DeleteService(sID); err != nil {
+			return err
+		}
+	}
+
+	if err := dm.Repo.Remove(qID); err != nil {
+		return err
+	}
 
 	return err
 }
@@ -120,7 +129,10 @@ func (dm DeploymentManager) CreateDeployment(depB DeploymentBlueprint) (Deployme
 		return DeploymentResponseLite{}, err
 	}
 
-	as := dm.Client.CreateServices(buf)
+	as, err := dm.Client.CreateServices(buf)
+	if err != nil {
+		return DeploymentResponseLite{}, err
+	}
 
 	tn := depB.Template.Name
 	dep, err := makeRepoDeployment(tn, mImgs, as)
@@ -149,7 +161,9 @@ func (dm DeploymentManager) ReDeploy(ID int) (DeploymentResponseLite, error) {
 	dep, err := dm.Repo.FindByID(ID)
 
 	var tpl Template
-	json.Unmarshal([]byte(dep.Template), &tpl)
+	if err := json.Unmarshal([]byte(dep.Template), &tpl); err != nil {
+		return DeploymentResponseLite{}, err
+	}
 
 	if err := dm.DeleteDeployment(ID); err != nil {
 		return DeploymentResponseLite{}, err
@@ -220,6 +234,7 @@ func deploymentResponseLiteFromRawValues(id int, nm string, tpl string, sids str
 		Name:         nm,
 		Redeployable: tpl != "",
 	}
+	// if this is an empty string it will fail to unmarshal, and we are fine with that.
 	json.Unmarshal([]byte(sids), &drl.ServiceIDs)
 
 	return *drl

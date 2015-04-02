@@ -16,13 +16,17 @@ func listDeployments(dm agent.DeploymentManager, w http.ResponseWriter, r *http.
 		log.Fatal(err)
 	}
 
-	json.NewEncoder(w).Encode(drs)
+	if err := json.NewEncoder(w).Encode(drs); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func createDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
 	depB := &agent.DeploymentBlueprint{}
 	jd := json.NewDecoder(r.Body)
-	jd.Decode(depB)
+	if err := jd.Decode(depB); err != nil {
+		log.Fatal(err)
+	}
 
 	dr, err := dm.CreateDeployment(*depB)
 	if err != nil {
@@ -35,7 +39,10 @@ func createDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	w.Write(drj)
+	_, err = w.Write(drj)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func deleteDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
@@ -52,7 +59,9 @@ func showDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.R
 		log.Fatal(err)
 	}
 
-	json.NewEncoder(w).Encode(dr)
+	if err := json.NewEncoder(w).Encode(dr); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func reDeploy(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
@@ -62,14 +71,18 @@ func reDeploy(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(dr)
+	if err := json.NewEncoder(w).Encode(dr); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func metadata(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
 	md, _ := dm.FetchMetadata()
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(md)
+	if err := json.NewEncoder(w).Encode(md); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func idFromQuery(uvars map[string]string) int {
