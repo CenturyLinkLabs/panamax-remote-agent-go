@@ -3,6 +3,8 @@ package adapter
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -28,6 +30,10 @@ func (sc servicesClient) CreateServices(buf *bytes.Buffer) ([]Service, error) {
 	defer resp.Body.Close()
 	if err != nil {
 		return []Service{}, err
+	}
+	if resp.StatusCode != http.StatusCreated {
+		body, _ := ioutil.ReadAll(resp.Body)
+		return []Service{}, fmt.Errorf("Failed to create services, resp code: %d, body: %s", resp.StatusCode, string(body))
 	}
 
 	ars := &[]Service{}

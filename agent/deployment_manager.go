@@ -193,6 +193,10 @@ func (dm DeploymentManager) FetchMetadata() (Metadata, error) {
 
 func makeRepoDeployment(tn string, mImgs []Image, as []adapter.Service) (repo.Deployment, error) {
 	ts, err := stringifyTemplate(tn, mImgs)
+	if err != nil {
+		return repo.Deployment{}, err
+	}
+
 	ss, err := stringifyServiceIDs(as)
 
 	if err != nil {
