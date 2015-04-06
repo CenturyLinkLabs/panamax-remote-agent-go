@@ -144,8 +144,10 @@ func TestListDeploymentsWhenNoDeploymentsExist(t *testing.T) {
 
 func TestCreateDeployment(t *testing.T) {
 	var resBody []byte
+	var rURL string
 	setup(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		resBody, _ = ioutil.ReadAll(r.Body)
+		rURL = r.URL.Path
 
 		drs := []adapter.Service{
 			{ID: "wp-pod"},
@@ -268,6 +270,7 @@ func TestCreateDeployment(t *testing.T) {
 
 	assert.Equal(t, 201, res.StatusCode)
 	assert.Equal(t, "application/json; charset=utf-8", res.Header["Content-Type"][0])
+	assert.Equal(t, "/v1/services", rURL)
 	assert.NotNil(t, dr.ID)
 	assert.Equal(t, "fooya", dr.Name)
 	assert.Equal(t, true, dr.Redeployable)

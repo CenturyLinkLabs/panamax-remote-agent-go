@@ -97,5 +97,8 @@ func (sc servicesClient) FetchMetadata() (interface{}, error) {
 }
 
 func (sc servicesClient) servicesPath(id string) string {
-	return sc.endpoint + "/v1/services/" + id
+	if id != "" {
+		return sc.endpoint + "/v1/services/" + id
+	}
+	return sc.endpoint + "/v1/services"
 }
