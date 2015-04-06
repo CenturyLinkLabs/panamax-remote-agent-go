@@ -5,6 +5,17 @@ import (
 	"strconv"
 )
 
+// A Manager is responsible for coordinating deployment related use cases.
+type Manager interface {
+	ListDeployments() ([]DeploymentResponseLite, error)
+	GetFullDeployment(int) (DeploymentResponseFull, error)
+	GetDeployment(int) (DeploymentResponseLite, error)
+	DeleteDeployment(int) error
+	CreateDeployment(DeploymentBlueprint) (DeploymentResponseLite, error)
+	ReDeploy(int) (DeploymentResponseLite, error)
+	FetchMetadata() (Metadata, error)
+}
+
 // A DeploymentBlueprint is the top level entity, containing all the
 // necessary bits to kick off a deployment.
 type DeploymentBlueprint struct {

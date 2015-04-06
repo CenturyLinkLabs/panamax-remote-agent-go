@@ -8,22 +8,21 @@ import (
 	"github.com/CenturyLinkLabs/panamax-remote-agent-go/repo"
 )
 
-// A DeploymentManager is responsabile for coordinating deployment related use cases.
-type DeploymentManager struct {
+type deploymentManager struct {
 	Repo   repo.Persister
 	Client adapter.Client
 }
 
-// MakeDeploymentManager returns a DeploymentManager hydrated with a persister and adapter client.
-func MakeDeploymentManager(p repo.Persister, c adapter.Client) DeploymentManager {
-	return DeploymentManager{
+// MakeDeploymentManager returns a deploymentManager hydrated with a persister and adapter client.
+func MakeDeploymentManager(p repo.Persister, c adapter.Client) Manager {
+	return deploymentManager{
 		Repo:   p,
 		Client: c,
 	}
 }
 
 // ListDeployments lists all available deployments in a repo.
-func (dm DeploymentManager) ListDeployments() ([]DeploymentResponseLite, error) {
+func (dm deploymentManager) ListDeployments() ([]DeploymentResponseLite, error) {
 	deps, err := dm.Repo.All()
 	if err != nil {
 		return []DeploymentResponseLite{}, err
@@ -46,7 +45,7 @@ func (dm DeploymentManager) ListDeployments() ([]DeploymentResponseLite, error) 
 }
 
 // GetFullDeployment returns an extended representation of the deployment with the given ID.
-func (dm DeploymentManager) GetFullDeployment(qid int) (DeploymentResponseFull, error) {
+func (dm deploymentManager) GetFullDeployment(qid int) (DeploymentResponseFull, error) {
 	dep, err := dm.GetDeployment(qid)
 
 	if err != nil {
@@ -76,7 +75,7 @@ func (dm DeploymentManager) GetFullDeployment(qid int) (DeploymentResponseFull, 
 }
 
 // GetDeployment returns a representation of the deployment with the given ID.
-func (dm DeploymentManager) GetDeployment(qid int) (DeploymentResponseLite, error) {
+func (dm deploymentManager) GetDeployment(qid int) (DeploymentResponseLite, error) {
 	dep, err := dm.Repo.FindByID(qid)
 	if err != nil {
 		return DeploymentResponseLite{}, err
@@ -94,7 +93,7 @@ func (dm DeploymentManager) GetDeployment(qid int) (DeploymentResponseLite, erro
 
 // DeleteDeployment deletes the deployment, with the given ID,
 // from both the repo and adapter.
-func (dm DeploymentManager) DeleteDeployment(qID int) error {
+func (dm deploymentManager) DeleteDeployment(qID int) error {
 	dep, err := dm.Repo.FindByID(qID)
 
 	if err != nil {
@@ -120,7 +119,7 @@ func (dm DeploymentManager) DeleteDeployment(qID int) error {
 }
 
 // CreateDeployment creates a new deployment from a DeploymentBlueprint.
-func (dm DeploymentManager) CreateDeployment(depB DeploymentBlueprint) (DeploymentResponseLite, error) {
+func (dm deploymentManager) CreateDeployment(depB DeploymentBlueprint) (DeploymentResponseLite, error) {
 
 	mImgs := depB.MergedImages()
 
@@ -156,7 +155,7 @@ func (dm DeploymentManager) CreateDeployment(depB DeploymentBlueprint) (Deployme
 
 // ReDeploy recreates a given deployment, by deleteing, then creating with the
 // same template. The returned record will have a new ID.
-func (dm DeploymentManager) ReDeploy(ID int) (DeploymentResponseLite, error) {
+func (dm deploymentManager) ReDeploy(ID int) (DeploymentResponseLite, error) {
 
 	dep, err := dm.Repo.FindByID(ID)
 
@@ -178,7 +177,7 @@ func (dm DeploymentManager) ReDeploy(ID int) (DeploymentResponseLite, error) {
 }
 
 // FetchMetadata returns metadata for the agent and adapter.
-func (dm DeploymentManager) FetchMetadata() (Metadata, error) {
+func (dm deploymentManager) FetchMetadata() (Metadata, error) {
 	adapterMeta, _ := dm.Client.FetchMetadata()
 
 	md := Metadata{

@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func listDeployments(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
+func listDeployments(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
 	drs, err := dm.ListDeployments()
 	if err != nil {
 		log.Fatal(err)
@@ -21,7 +21,7 @@ func listDeployments(dm agent.DeploymentManager, w http.ResponseWriter, r *http.
 	}
 }
 
-func createDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
+func createDeployment(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
 	depB := &agent.DeploymentBlueprint{}
 	jd := json.NewDecoder(r.Body)
 	if err := jd.Decode(depB); err != nil {
@@ -45,7 +45,7 @@ func createDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http
 	}
 }
 
-func deleteDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
+func deleteDeployment(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
 	if err := dm.DeleteDeployment(idFromQuery(mux.Vars(r))); err != nil {
 		log.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func deleteDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func showDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
+func showDeployment(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
 	dr, err := dm.GetFullDeployment(idFromQuery(mux.Vars(r)))
 	if err != nil {
 		log.Fatal(err)
@@ -64,7 +64,7 @@ func showDeployment(dm agent.DeploymentManager, w http.ResponseWriter, r *http.R
 	}
 }
 
-func reDeploy(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
+func reDeploy(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
 	dr, err := dm.ReDeploy(idFromQuery(mux.Vars(r)))
 	if err != nil {
 		log.Fatal(err)
@@ -76,7 +76,7 @@ func reDeploy(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request
 	}
 }
 
-func metadata(dm agent.DeploymentManager, w http.ResponseWriter, r *http.Request) {
+func metadata(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
 	md, _ := dm.FetchMetadata()
 
 	w.WriteHeader(http.StatusOK)

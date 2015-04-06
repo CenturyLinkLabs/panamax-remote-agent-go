@@ -7,7 +7,7 @@ type route struct {
 	Name        string
 	Method      string
 	Pattern     string
-	HandlerFunc func(agent.DeploymentManager, http.ResponseWriter, *http.Request)
+	HandlerFunc func(agent.Manager, http.ResponseWriter, *http.Request)
 }
 
 var routes = []route{

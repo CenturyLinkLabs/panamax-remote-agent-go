@@ -10,21 +10,21 @@ import (
 )
 
 type secureServer struct {
-	DeploymentManager agent.DeploymentManager
-	username          string
-	password          string
-	certFile          string
-	keyFile           string
+	Manager  agent.Manager
+	username string
+	password string
+	certFile string
+	keyFile  string
 }
 
 // MakeServer returns a new Server instance containting a manager to which it will defer work.
-func MakeServer(dm agent.DeploymentManager, un string, pw string, cf string, kf string) Server {
+func MakeServer(dm agent.Manager, un string, pw string, cf string, kf string) Server {
 	return secureServer{
-		DeploymentManager: dm,
-		username:          un,
-		password:          pw,
-		certFile:          cf,
-		keyFile:           kf,
+		Manager:  dm,
+		username: un,
+		password: pw,
+		certFile: cf,
+		keyFile:  kf,
 	}
 }
 
@@ -37,7 +37,7 @@ func (s secureServer) Start(addr string) {
 func (s secureServer) newRouter() *mux.Router {
 	r := mux.NewRouter()
 
-	dm := s.DeploymentManager
+	dm := s.Manager
 
 	for _, route := range routes {
 		fct := route.HandlerFunc
