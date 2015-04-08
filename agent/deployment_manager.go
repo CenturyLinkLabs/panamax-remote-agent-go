@@ -191,9 +191,7 @@ func (dm deploymentManager) FetchMetadata() (Metadata, error) {
 	adapterMeta, _ := dm.Client.FetchMetadata()
 
 	md := Metadata{
-		Agent: struct {
-			Version string `json:"version"`
-		}{Version: dm.version},
+		Agent:   AgentMetadata{Version: dm.version},
 		Adapter: adapterMeta,
 	}
 

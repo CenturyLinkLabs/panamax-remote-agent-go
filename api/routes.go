@@ -1,6 +1,9 @@
 package api
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+)
 import "github.com/CenturyLinkLabs/panamax-remote-agent-go/agent"
 
 type route struct {
@@ -10,41 +13,64 @@ type route struct {
 	HandlerFunc func(agent.Manager, http.ResponseWriter, *http.Request)
 }
 
+const (
+	metadataURN    = "/metadata"
+	deploymentsURN = "/deployments"
+	deploymentURN  = deploymentsURN + "/{id}"
+	reDeployURN    = deploymentURN + "/redeploy"
+)
+
 var routes = []route{
 	{
 		"showDeployment",
 		"GET",
-		"/deployments/{id}",
-		showDeployment,
+		deploymentURN,
+		ShowDeployment,
 	},
 	{
 		"listDeployments",
 		"GET",
-		"/deployments",
-		listDeployments,
+		deploymentsURN,
+		ListDeployments,
 	},
 	{
 		"createDeployment",
 		"POST",
-		"/deployments",
+		deploymentsURN,
 		createDeployment,
 	},
 	{
 		"deleteDeployment",
 		"DELETE",
-		"/deployments/{id}",
-		deleteDeployment,
+		deploymentURN,
+		DeleteDeployment,
 	},
 	{
 		"reDeploy",
 		"POST",
-		"/deployments/{id}/redeploy",
-		reDeploy,
+		reDeployURN,
+		ReDeploy,
 	},
 	{
 		"metadata",
 		"GET",
-		"/metadata",
-		metadata,
+		metadataURN,
+		Metadata,
 	},
+}
+
+func URLForDeploymentID(id string) string {
+	return strings.Replace(deploymentURN, "{id}", id, 1)
+}
+
+func RedeploymentURLForDeploymentID(id string) string {
+	return strings.Replace(reDeployURN, "{id}", id, 1)
+}
+
+func URLForDeployments() string {
+	return deploymentsURN
+}
+
+func URLForMetadata() string {
+	return metadataURN
 }

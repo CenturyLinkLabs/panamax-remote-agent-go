@@ -257,8 +257,10 @@ type Service struct {
 
 // Metadata contains general meta data for both the Agent and the Adapter.
 type Metadata struct {
-	Agent struct {
-		Version string `json:"version"`
-	} `json:"agent"`
-	Adapter interface{} `json:"adapter"`
+	Agent   AgentMetadata `json:"agent"`
+	Adapter interface{}   `json:"adapter"`
+}
+
+type AgentMetadata struct {
+	Version string `json:"version"`
 }
