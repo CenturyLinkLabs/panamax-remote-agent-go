@@ -16,7 +16,7 @@ func main() {
 	sf := flag.Bool("secure", true, "whether or not to use SSL and BasicAuth, defaults to true")
 	flag.Parse()
 
-	p, err := repo.MakePersister(dbLocation())
+	p, err := repo.MakeDeploymentStore(dbLocation())
 	if err != nil {
 		log.Fatal(err)
 	}
