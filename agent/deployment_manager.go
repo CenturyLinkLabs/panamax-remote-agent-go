@@ -9,15 +9,17 @@ import (
 )
 
 type deploymentManager struct {
-	Repo   repo.Persister
-	Client adapter.Client
+	Repo    repo.Persister
+	Client  adapter.Client
+	version string
 }
 
 // MakeDeploymentManager returns a deploymentManager hydrated with a persister and adapter client.
-func MakeDeploymentManager(p repo.Persister, c adapter.Client) Manager {
+func MakeDeploymentManager(p repo.Persister, c adapter.Client, v string) Manager {
 	return deploymentManager{
-		Repo:   p,
-		Client: c,
+		Repo:    p,
+		Client:  c,
+		version: v,
 	}
 }
 
@@ -183,7 +185,7 @@ func (dm deploymentManager) FetchMetadata() (Metadata, error) {
 	md := Metadata{
 		Agent: struct {
 			Version string `json:"version"`
-		}{Version: "v1"}, // TODO pull this from a const or ENV or something
+		}{Version: dm.version},
 		Adapter: adapterMeta,
 	}
 

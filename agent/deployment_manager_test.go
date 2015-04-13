@@ -90,7 +90,7 @@ func TestSuccessfullListDeployments(t *testing.T) {
 		},
 	}
 	fc := fakeAdapterClient{}
-	dm := MakeDeploymentManager(fr, fc)
+	dm := MakeDeploymentManager(fr, fc, "v1")
 
 	drs, err := dm.ListDeployments()
 
@@ -114,7 +114,7 @@ func TestErroredListDeployments(t *testing.T) {
 		},
 	}
 	fc := fakeAdapterClient{}
-	dm := MakeDeploymentManager(fr, fc)
+	dm := MakeDeploymentManager(fr, fc, "v1")
 
 	drs, err := dm.ListDeployments()
 
@@ -137,7 +137,7 @@ func TestSuccessfulGetDeployment(t *testing.T) {
 			return dr, nil
 		},
 	}
-	dm := MakeDeploymentManager(fr, fakeAdapterClient{})
+	dm := MakeDeploymentManager(fr, fakeAdapterClient{}, "v1")
 
 	dr, err := dm.GetDeployment(7)
 
@@ -173,7 +173,7 @@ func TestSuccessfulGetDeploymentWithNoTemplate(t *testing.T) {
 		},
 	}
 
-	dm := MakeDeploymentManager(fr, fc)
+	dm := MakeDeploymentManager(fr, fc, "v1")
 
 	dr, err := dm.GetDeployment(7)
 
@@ -193,7 +193,7 @@ func TestErroredGetDeployment(t *testing.T) {
 			return repo.Deployment{}, errors.New("something failed")
 		},
 	}
-	dm := MakeDeploymentManager(fr, fakeAdapterClient{})
+	dm := MakeDeploymentManager(fr, fakeAdapterClient{}, "v1")
 
 	dr, err := dm.GetDeployment(7)
 
@@ -221,7 +221,7 @@ func TestSucessfulGetFullDeployment(t *testing.T) {
 			}
 		},
 	}
-	dm := MakeDeploymentManager(fr, fc)
+	dm := MakeDeploymentManager(fr, fc, "v1")
 
 	dr, err := dm.GetFullDeployment(7)
 
@@ -248,7 +248,7 @@ func TestErroredGetFullDeployment(t *testing.T) {
 			return repo.Deployment{}, errors.New("something failed")
 		},
 	}
-	dm := MakeDeploymentManager(fr, fakeAdapterClient{})
+	dm := MakeDeploymentManager(fr, fakeAdapterClient{}, "v1")
 
 	dr, err := dm.GetFullDeployment(7)
 
@@ -282,7 +282,7 @@ func TestSuccessfulDeleteDeployment(t *testing.T) {
 		},
 	}
 
-	dm := MakeDeploymentManager(fr, fc)
+	dm := MakeDeploymentManager(fr, fc, "v1")
 
 	err := dm.DeleteDeployment(7)
 
@@ -299,7 +299,7 @@ func TestDeleteDeploymentWhenItDoesNotExit(t *testing.T) {
 		},
 	}
 
-	dm := MakeDeploymentManager(fr, fakeAdapterClient{})
+	dm := MakeDeploymentManager(fr, fakeAdapterClient{}, "v1")
 
 	err := dm.DeleteDeployment(7)
 
@@ -324,7 +324,7 @@ func TestDeleteDeploymentWhenServiceDeletionFails(t *testing.T) {
 		},
 	}
 
-	dm := MakeDeploymentManager(fr, fc)
+	dm := MakeDeploymentManager(fr, fc, "v1")
 
 	err := dm.DeleteDeployment(7)
 
@@ -347,7 +347,7 @@ func TestDeleteDeploymentRepoDeletionFails(t *testing.T) {
 		},
 	}
 
-	dm := MakeDeploymentManager(fr, fakeAdapterClient{})
+	dm := MakeDeploymentManager(fr, fakeAdapterClient{}, "v1")
 
 	err := dm.DeleteDeployment(7)
 
@@ -363,7 +363,7 @@ func TestCreateDeploymentPersistedTheMergedTemplate(t *testing.T) {
 		},
 	}
 
-	dm := MakeDeploymentManager(fr, fakeAdapterClient{})
+	dm := MakeDeploymentManager(fr, fakeAdapterClient{}, "v1")
 
 	d := DeploymentBlueprint{
 		Template: Template{

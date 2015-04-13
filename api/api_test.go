@@ -32,7 +32,7 @@ func init() {
 func setup(hdlr http.Handler) {
 	adapterServer = httptest.NewServer(hdlr)
 	c := adapter.MakeClient(adapterServer.URL)
-	dm := agent.MakeDeploymentManager(rp, c)
+	dm := agent.MakeDeploymentManager(rp, c, "v1")
 	router = MakeServer(dm, "user", "pass", "", "").newRouter()
 	server = httptest.NewServer(router)
 	baseURI = server.URL

@@ -21,7 +21,7 @@ func main() {
 		log.Fatal(err)
 	}
 	c := adapter.MakeClient(adapterEndpoint())
-	dm := agent.MakeDeploymentManager(p, c)
+	dm := agent.MakeDeploymentManager(p, c, version())
 	s := makeServer(dm, sf)
 	s.Start(serverPort())
 }
@@ -40,6 +40,10 @@ func makeServer(dm agent.Manager, sf *bool) api.Server {
 	} else {
 		return api.MakeInsecureServer(dm)
 	}
+}
+
+func version() string {
+	return os.Getenv("REMOTE_AGENT_VERSION")
 }
 
 func username() string {
