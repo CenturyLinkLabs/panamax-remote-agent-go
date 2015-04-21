@@ -243,9 +243,9 @@ func TestCreateDeployment(t *testing.T) {
 			"command":"./run.sh",
 			"deployment":{"count":1},
 			"environment":[{"variable":"DB_PASSWORD","value":"pass@word02"},{"variable":"DB_NAME","value":"wordpress"}],
-			"links":[{"alias":"DB_1","name":"mysql"}],
+			"links":[{"alias":"DB_1","name":"mysql","service":"mysql"}],
 			"name":"wp",
-			"ports":[{"containerPort":80,"hostPort":8000}],
+			"ports":[{"containerPort":80,"container_port":80,"hostPort":8000,"host_port":8000}],
 			"source":"centurylink/wordpress:3.9.1"
 		},
 		{
@@ -253,10 +253,11 @@ func TestCreateDeployment(t *testing.T) {
 			"environment":[{"variable":"MYSQL_ROOT_PASSWORD","value":"pass@word02"}],
 			"expose":[1234,5678],
 			"name":"mysql",
-			"ports":[{"containerPort":3306,"hostPort":3306}],
+			"ports":[{"containerPort":3306,"container_port":3306,"hostPort":3306,"host_port":3306}],
 			"source":"centurylink/mysql:5.5",
-			"volumes":[{"containerPath":"/var/bar","hostPath":"foo/bar"}],
-			"volumesFrom":["wp"]
+			"volumes":[{"containerPath":"/var/bar","container_path":"/var/bar","hostPath":"foo/bar","host_path":"foo/bar"}],
+			"volumesFrom":["wp"],
+			"volumes_from":["wp"]
 		},
 		{
 			"name":"honeybadger",
