@@ -17,7 +17,11 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-var DefaultHTTPTimeout = 10
+var (
+	DefaultHTTPTimeout = 10
+	// Allow SSL certificate verification to be skipped. This is frowned upon.
+	SkipSSLVerify = false
+)
 
 func init() {
 	log.SetLevel(log.ErrorLevel)
@@ -143,7 +147,7 @@ func (c *APIClient) getClient() *http.Client {
 	verifyingTLS := &http.Transport{
 		TLSClientConfig: &tls.Config{
 			RootCAs:            pool,
-			InsecureSkipVerify: false,
+			InsecureSkipVerify: SkipSSLVerify,
 		},
 	}
 
