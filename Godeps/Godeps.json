@@ -1,10 +1,15 @@
 {
 	"ImportPath": "github.com/CenturyLinkLabs/panamax-remote-agent-go",
-	"GoVersion": "go1.4",
+	"GoVersion": "go1.4.2",
 	"Packages": [
 		"./..."
 	],
 	"Deps": [
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.7.2-2-ge00ed35",
+			"Rev": "e00ed35f54d331c88f1867a18a7bfc4e4e4685ac"
+		},
 		{
 			"ImportPath": "github.com/gorilla/context",
 			"Rev": "215affda49addc4c8ef7e2534915df2c8c35c6cd"

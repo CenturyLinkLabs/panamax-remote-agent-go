@@ -10,7 +10,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func listDeployments(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
+// ListDeployments queries the manager and writes deployment JSON to the
+// http.ResponseWriter.
+func ListDeployments(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
 	drs, err := dm.ListDeployments()
 	if err != nil {
 		log.Fatal(err)
@@ -21,7 +23,10 @@ func listDeployments(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func createDeployment(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
+// CreateDeployment receives a JSON DeploymentBlueprint that will be handled by
+// the agent.Manager and responded to with a DeploymentResponseLite, if
+// appropriate.
+func CreateDeployment(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
 	depB := &agent.DeploymentBlueprint{}
 	jd := json.NewDecoder(r.Body)
 	if err := jd.Decode(depB); err != nil {
@@ -45,7 +50,9 @@ func createDeployment(dm agent.Manager, w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func deleteDeployment(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
+// DeleteDeployment tells the manager to delete a deployment and returns a No
+// Content response code.
+func DeleteDeployment(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
 	if err := dm.DeleteDeployment(idFromQuery(mux.Vars(r))); err != nil {
 		log.Fatal(err)
 	}
@@ -53,7 +60,8 @@ func deleteDeployment(dm agent.Manager, w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func showDeployment(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
+// ShowDeployment gets a deployment from the manager and returns its full JSON.
+func ShowDeployment(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
 	dr, err := dm.GetFullDeployment(idFromQuery(mux.Vars(r)))
 	if err != nil {
 		log.Fatal(err)
@@ -64,7 +72,8 @@ func showDeployment(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func reDeploy(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
+// ReDeploy deletes and re-deploys an existing deployment.
+func ReDeploy(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
 	dr, err := dm.ReDeploy(idFromQuery(mux.Vars(r)))
 	if err != nil {
 		log.Fatal(err)
@@ -76,7 +85,8 @@ func reDeploy(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func metadata(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
+// Metadata retrieves metadata from the Manager and writes JSON.
+func Metadata(dm agent.Manager, w http.ResponseWriter, r *http.Request) {
 	md, _ := dm.FetchMetadata()
 
 	w.WriteHeader(http.StatusOK)

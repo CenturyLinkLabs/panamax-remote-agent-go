@@ -37,9 +37,9 @@ func makeServer(dm agent.Manager, sf *bool) api.Server {
 			certFile(),
 			keyFile(),
 		)
-	} else {
-		return api.MakeInsecureServer(dm)
 	}
+
+	return api.MakeInsecureServer(dm)
 }
 
 func version() string {
