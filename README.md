@@ -10,6 +10,10 @@
 
 Replaces [CenturyLinkLabs/panamax-remote-agent](https://github.com/CenturyLinkLabs/panamax-remote-agent)
 
+## NOTE
+
+This repo is no longer being maintained. Users are welcome to fork it, but we make no warranty of its functionality.
+
 ## Installation for development
 
 Pre-requisites
